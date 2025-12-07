@@ -33,9 +33,10 @@ body {
 }
 
 #video-container { position: relative; flex-grow: 1; background:#000; overflow:hidden; }
-video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contrast(1.1); transform: scale(1); transform-origin: center; transition: transform 0.1s; position:relative; z-index: 1; }
+/* Added transition for smooth zoom syncing */
+video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contrast(1.1); transform: scale(1); transform-origin: center; transition: transform 0.2s ease-out; position:relative; z-index: 1; }
 
-/* Hidden audio for Two-Way Talk */
+/* Hidden audio for Two-Way Talk (Host hears Viewer) */
 #remote-audio { display: none; }
 
 #motion-alert {
@@ -194,7 +195,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 /* Viewer Controls */
 #viewer-controls {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 15px; z-index: 100;
+  display: flex; gap: 15px; z-index: 100; align-items: center;
 }
 .remote-btn {
   width: 58px; height: 58px; border-radius: 50%; border: none;
@@ -208,7 +209,14 @@ input:checked + .slider:before { transform: translateX(22px); }
 .remote-btn:active { transform: scale(0.95); }
 .remote-btn.active { background: var(--accent); border-color: var(--accent-glow); box-shadow: 0 0 20px var(--accent); color: white; }
 .remote-btn.active span { color: white; }
-.remote-btn.talking { background: var(--live); box-shadow: 0 0 25px var(--live); border-color: #4ade80; animation: pulse 1s infinite; }
+
+/* Large Talk Button */
+#rem-talk { 
+    width: 75px; height: 75px; 
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+}
+#rem-talk.talking { background: var(--live); box-shadow: 0 0 25px var(--live); border-color: #4ade80; animation: pulse 1s infinite; }
 
 #viewer-back-btn {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100;
@@ -321,20 +329,20 @@ input:checked + .slider:before { transform: translateX(22px); }
         <button id="btn-speaker" class="tool-btn active" onclick="toggleHostSpeaker()">🔊 Spkr</button>
     </div>
     <div class="divider" style="margin: 10px 0 5px 0;"><span>DIGITAL ZOOM</span></div>
-    <input type="range" id="zoom-slider" min="1" max="3" step="0.1" value="1" oninput="setZoom(this.value)">
+    <input type="range" id="zoom-slider" min="1" max="4" step="0.1" value="1" oninput="setZoom(this.value)">
     <p id="security-status" style="text-align:center;color:var(--danger);font-weight:bold;display:none;font-size:12px;margin-top:10px;">[ ANTI-THEFT ACTIVE ]</p>
   </div>
 </div>
 
 <div id="viewer-controls" class="hidden">
-    <button id="rem-spk" class="remote-btn active" onclick="toggleRemoteSpeaker()">
+    <button id="rem-spk" class="remote-btn" onclick="toggleRemoteSpeaker()">
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
         <span>Speaker</span>
     </button>
     
-    <button id="rem-talk" class="remote-btn" onclick="toggleTwoWay()">
+    <button id="rem-talk" class="remote-btn" onmousedown="startTalking()" onmouseup="stopTalking()" ontouchstart="startTalking()" ontouchend="stopTalking()">
         <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        <span>Talk</span>
+        <span>TALK</span>
     </button>
 
     <button id="rem-torch" class="remote-btn" onclick="remoteToggleTorch()">
@@ -387,7 +395,6 @@ let heartbeatInterval = null;
 let isTorchOn = false;
 let isMicOn = true;
 let isSpeakerOn = true; 
-let isTwoWayOn = false; // Is viewer talking?
 
 // New Global Vars
 let mediaRecorder;
@@ -498,8 +505,17 @@ function triggerMotionAlert() {
   savePhoto(c.toDataURL('image/jpeg', 0.5));
 }
 
+// --- ZOOM LOGIC (SYNCHRONIZED) ---
 function setZoom(val) {
+  // Apply local zoom (Host)
   video.style.transform = `scale(${val})`;
+  
+  // Broadcast zoom level to all viewers
+  if(isHost) {
+      activeConnections.forEach(conn => {
+          if(conn.open) conn.send({type: 'ZOOM_SYNC', value: val});
+      });
+  }
 }
 
 function toggleRecording() {
@@ -566,23 +582,10 @@ function drawVisualizer() {
 // --- HARDWARE CONTROLS ---
 async function toggleTorch(fromRemote = false) {
     if(!localStream) return;
-    // CRITICAL FIX: Always get the current video track, it might change on reconnect
     const track = localStream.getVideoTracks()[0];
     if(!track) return;
-    
-    // Check capabilities
-    const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-    
-    // Attempt toggle if torch is supported OR if we are just blindly trying
     isTorchOn = !isTorchOn;
-    
-    try {
-        await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
-    } catch(e) {
-        console.log("Torch error:", e);
-        // Fallback for some Androids that don't like advanced constraints if not supported
-    }
-
+    try { await track.applyConstraints({ advanced: [{ torch: isTorchOn }] }); } catch(e) {}
     updateHardwareUI();
     broadcastState();
 }
@@ -618,61 +621,48 @@ function updateHardwareUI() {
 function remoteToggleTorch() {
     if(activeConnections[0] && activeConnections[0].open) {
         activeConnections[0].send({type: 'REMOTE_TORCH'});
-        // Visual feedback for user
+        // Feedback
         const btn = document.getElementById('rem-torch');
         btn.style.borderColor = 'var(--accent)';
         setTimeout(() => btn.style.borderColor = 'rgba(255,255,255,0.2)', 200);
-    } else {
-        alert("Not connected to host");
     }
 }
 
-// 2. Speaker (Mute Incoming)
+// 2. Speaker (Mute Incoming from Host)
 function toggleRemoteSpeaker() {
-    video.muted = !video.muted;
     const btn = document.getElementById('rem-spk');
-    if(!video.muted) { btn.classList.add('active'); } 
-    else { btn.classList.remove('active'); }
+    
+    // Toggle Mute State
+    if (video.muted) {
+        // Unmute
+        video.muted = false;
+        video.volume = 1.0;
+        btn.classList.add('active');
+        btn.innerHTML = `
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <span>Sound ON</span>`;
+    } else {
+        // Mute
+        video.muted = true;
+        btn.classList.remove('active');
+        btn.innerHTML = `
+        <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        <span>Muted</span>`;
+    }
 }
 
-// 3. Two-Way Talk (Toggle)
-function toggleTwoWay() {
-    const btn = document.getElementById('rem-talk');
-    
-    if(!isTwoWayOn) {
-        // TURN ON
-        if(!viewerStream) {
-            // First time requesting mic
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                viewerStream = stream;
-                // Add audio track to the peer connection
-                if(activeConnections[0]) {
-                    const audioTrack = viewerStream.getAudioTracks()[0];
-                    const sender = peer.connections[activeConnections[0].peer][0].peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
-                    if(sender) {
-                        sender.replaceTrack(audioTrack);
-                    } else {
-                        // If no sender, we might need to renegotiate or add track (PeerJS limits this, but replaceTrack usually works if established)
-                        // Simple fallback: The initial call usually includes audio track even if empty.
-                        // For this simple app, we assume call.answer(stream) was used.
-                    }
-                }
-                isTwoWayOn = true;
-                btn.classList.add('talking');
-            }).catch(e => alert("Mic permission denied"));
-        } else {
-            // Already have stream, just enable track
-            viewerStream.getAudioTracks()[0].enabled = true;
-            isTwoWayOn = true;
-            btn.classList.add('talking');
-        }
-    } else {
-        // TURN OFF
-        if(viewerStream) {
-            viewerStream.getAudioTracks()[0].enabled = false;
-        }
-        isTwoWayOn = false;
-        btn.classList.remove('talking');
+// 3. Two-Way Talk (Push to Talk)
+function startTalking() {
+    if(viewerStream) {
+        viewerStream.getAudioTracks()[0].enabled = true;
+        document.getElementById('rem-talk').classList.add('talking');
+    }
+}
+
+function stopTalking() {
+    if(viewerStream) {
+        viewerStream.getAudioTracks()[0].enabled = false;
+        document.getElementById('rem-talk').classList.remove('talking');
     }
 }
 
@@ -708,9 +698,12 @@ function showUI(mode) {
   if (mode === 'viewer') {
       viewerBackBtn.classList.remove('hidden');
       viewerControls.classList.remove('hidden');
-      // Set default viewer states
-      video.muted = false; // Start with sound ON
-      document.getElementById('rem-spk').classList.add('active');
+      // Viewer starts muted (browser policy), user must tap speaker to unmute
+      video.muted = true; 
+      // Update UI to show it's muted
+      const btn = document.getElementById('rem-spk');
+      btn.classList.remove('active');
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg><span>Muted</span>`;
   } else {
       viewerBackBtn.classList.add('hidden');
       viewerControls.classList.add('hidden');
@@ -749,7 +742,7 @@ function goBackToMenu() {
   video.srcObject = null;
   countSpan.innerText = "0";
   isHost = false;
-  isTorchOn = false; isMicOn = true; isTwoWayOn = false;
+  isTorchOn = false; isMicOn = true; isSpeakerOn = true;
   updateHardwareUI();
 }
 
@@ -773,7 +766,7 @@ function startHost() {
   getCameraStream().then(stream => {
       localStream = stream;
       video.srcObject = stream;
-      video.muted = true; video.volume = 0;
+      video.muted = true; video.volume = 0; // Host mutes local video feedback
       video.play().catch(e => console.log(e));
       showUI('host');
       initAudioVisualizer(stream); 
@@ -793,6 +786,9 @@ function startHost() {
         conn.on('open', () => {
             conn.send({ type: 'SYNC_STATUS', security: isArmed });
             conn.send({ type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn });
+            // Send current zoom level to new viewer
+            const currentZoom = document.getElementById('zoom-slider').value;
+            conn.send({ type: 'ZOOM_SYNC', value: currentZoom });
         });
         conn.on('close', () => { activeConnections = activeConnections.filter(c => c !== conn); updateViewerCount(); });
         
@@ -818,11 +814,10 @@ function startViewer() {
   const code = document.getElementById('remoteCode').value.trim();
   if (code.length !== 4) return alert("Enter 4-digit code");
   
-  // Initialize viewer with a dummy audio stream to allow two-way negotiation later
-  // We ask for mic immediately to set up the channel
+  // Initialize viewer with mic stream (muted initially)
   navigator.mediaDevices.getUserMedia({ audio: true }).then(vStream => {
       viewerStream = vStream;
-      viewerStream.getAudioTracks()[0].enabled = false; // Start muted
+      viewerStream.getAudioTracks()[0].enabled = false; // Start muted (Push to Talk)
 
       isHost = false;
       statusEl.innerText = "Connecting...";
@@ -846,8 +841,8 @@ function startViewer() {
           call.answer(viewerStream);
           call.on('stream', stream => {
             video.srcObject = stream;
-            // Ensure muted is false so we hear host
-            video.muted = false; video.volume = 1;
+            // Video plays, but starts Muted to prevent feedback loop until user unmutes
+            video.muted = true; 
             video.play().catch(e => console.log(e));
             viewerTag.classList.remove('hidden');
             countSpan.parentElement.style.display = 'none';
@@ -873,6 +868,7 @@ function handleData(conn) {
         }
         if (data.type === 'LOG_DATA') renderGallery(data.photos);
         if (data.type === 'STATE_UPDATE') updateViewerUI(data);
+        if (data.type === 'ZOOM_SYNC') video.style.transform = `scale(${data.value})`;
     }
   });
 }
