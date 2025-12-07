@@ -33,7 +33,7 @@ body {
 }
 
 #video-container { position: relative; flex-grow: 1; background:#000; overflow:hidden; }
-video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contrast(1.1); transform: scaleX(1); position:relative; z-index: 1; }
+video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contrast(1.1); transform: scale(1); transform-origin: center; transition: transform 0.1s; position:relative; z-index: 1; }
 
 #motion-alert {
   position: absolute; inset:0; pointer-events:none; z-index:20; opacity:0;
@@ -42,6 +42,12 @@ video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contr
   transition: opacity 0.2s;
 }
 #motion-alert.active { opacity:1; animation: alertPulse 0.5s infinite; }
+
+/* AUDIO VISUALIZER */
+#audio-visualizer {
+  position: absolute; bottom: 0; left: 0; width: 100%; height: 80px;
+  z-index: 10; pointer-events: none; opacity: 0.8;
+}
 
 /* --- ENHANCED DASHBOARD --- */
 #preview-overlay {
@@ -55,10 +61,7 @@ video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contr
   
   display:flex; flex-direction:column; 
   align-items:center; justify-content: center;
-  
-  /* POSITION FIX: Reduced bottom padding to lower the element */
   padding-bottom: 10vh; 
-  /* Add top margin to push it further down into the "orange circle" area */
   padding-top: 5vh;
 
   z-index:50; transition:all .8s ease;
@@ -67,10 +70,9 @@ body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scal
 
 .preview-content { text-align:center; position: relative; }
 
-/* Rotating Ring Effect - SIZE INCREASED */
 .logo-container {
   position: relative; 
-  width: 200px; height: 200px; /* Increased from 140px */
+  width: 200px; height: 200px; 
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 25px auto;
 }
@@ -86,15 +88,14 @@ body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scal
   animation: spin 2s linear infinite reverse;
 }
 
-/* Icon Size Increased */
 .logo-pulse svg { 
-    width: 110px; height: 110px; /* Increased from 80px */
+    width: 110px; height: 110px; 
     filter:drop-shadow(0 0 40px #3b82f6); 
     animation: logoPulse 2s ease-in-out infinite alternate; 
 }
 
 .preview-content h2 { 
-  font:900 38px 'Orbitron',sans-serif; /* Slightly larger text */
+  font:900 38px 'Orbitron',sans-serif; 
   background:linear-gradient(90deg,#fff, #3b82f6); -webkit-background-clip:text; background-clip:text; color:transparent; 
   letter-spacing:4px; text-transform: uppercase;
   margin-bottom: 15px;
@@ -148,6 +149,18 @@ input {
 }
 input:focus { border-color:var(--accent); box-shadow:0 0 15px rgba(59,130,246,.3); }
 
+/* Range Slider Styling */
+input[type=range] {
+  -webkit-appearance: none; width: 100%; background: transparent; padding: 0; margin: 10px 0;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; margin-top: -8px; box-shadow: 0 0 10px var(--accent);
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px;
+}
+
 button {
   background:linear-gradient(135deg,var(--accent),#2563eb); color:white; cursor:pointer;
   box-shadow:0 4px 15px rgba(37,99,235,.3); position:relative; overflow:hidden;
@@ -180,9 +193,11 @@ button:active { transform:scale(.98); }
 
 .hidden { display:none !important; }
 
-.host-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
-.tool-btn { font-size: 13px; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; transition: 0.2s; }
+/* Modified grid for 3 tools */
+.host-tools { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 5px; }
+.tool-btn { font-size: 11px; padding: 14px 5px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; transition: 0.2s; white-space: nowrap; }
 .tool-btn.active { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); color: var(--accent); }
+.tool-btn.recording { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); animation: pulse 1s infinite; }
 
 .security-row { display: flex; align-items: center; justify-content: space-between; background: rgba(239, 68, 68, 0.1); padding: 12px 16px; border-radius: 16px; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.3); }
 .security-label { font-weight: bold; color: var(--danger); display: flex; align-items: center; gap: 8px; font-size: 13px; }
@@ -242,15 +257,15 @@ input:checked + .slider:before { transform: translateX(22px); }
 @keyframes blinker { 50% { opacity:.4; } }
 @keyframes pulse { 0%,100% { box-shadow:0 0 20px var(--live); } 50% { box-shadow:0 0 35px var(--live),0 0 50px rgba(16,185,129,.4); } }
 @keyframes logoPulse { from { transform:scale(1); } to { transform:scale(1.12); } }
-@keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
-@keyframes glow { from { text-shadow:0 0 30px rgba(251,191,36,.5); } to { text-shadow:0 0 60px rgba(251,191,36,.9); } }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes glow { from { text-shadow:0 0 30px rgba(251,191,36,.5); } to { text-shadow:0 0 60px rgba(251,191,36,.9); } }
 </style>
 </head>
 <body>
 
 <div id="video-container">
   <video id="vid" autoplay playsinline muted></video>
+  <canvas id="audio-visualizer"></canvas>
   <div id="motion-alert"></div>
 
   <div id="preview-overlay">
@@ -323,7 +338,11 @@ input:checked + .slider:before { transform: translateX(22px); }
     <div class="host-tools">
         <button id="btn-torch" class="tool-btn" onclick="toggleTorch()">⚡ Flash</button>
         <button id="btn-mic" class="tool-btn" onclick="toggleMic()">🎤 Mute</button>
+        <button id="btn-record" class="tool-btn" onclick="toggleRecording()">REC ●</button>
     </div>
+
+    <div class="divider" style="margin: 10px 0 5px 0;"><span>DIGITAL ZOOM</span></div>
+    <input type="range" id="zoom-slider" min="1" max="3" step="0.1" value="1" oninput="setZoom(this.value)">
 
     <p id="security-status" style="text-align:center;color:var(--danger);font-weight:bold;display:none;font-size:12px;margin-top:10px;">[ ANTI-THEFT ACTIVE ]</p>
   </div>
@@ -379,6 +398,12 @@ let db = null;
 let heartbeatInterval = null;
 let isTorchOn = false;
 let isMicOn = true;
+
+// New Global Vars
+let mediaRecorder;
+let recordedChunks = [];
+let isRecording = false;
+let audioContext, analyser, dataArray, canvasCtx, visualizerCanvas;
 
 const PEER_CONFIG = {
     config: {
@@ -483,6 +508,102 @@ function triggerMotionAlert() {
   savePhoto(c.toDataURL('image/jpeg', 0.5));
 }
 
+// --- NEW FEATURES: ZOOM, RECORD, VISUALIZER ---
+
+function setZoom(val) {
+  video.style.transform = `scale(${val})`;
+}
+
+function toggleRecording() {
+  const btn = document.getElementById('btn-record');
+  
+  if (!isRecording) {
+    if (!localStream) return alert("No stream to record");
+    recordedChunks = [];
+    
+    // Try codecs
+    let options = { mimeType: 'video/webm;codecs=vp9' };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+    }
+
+    try {
+        mediaRecorder = new MediaRecorder(localStream, options);
+    } catch (e) {
+        alert("Recording not supported on this device/browser");
+        return;
+    }
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) recordedChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'security_clip_' + Date.now() + '.webm';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    btn.innerHTML = "STOP ■";
+    btn.classList.add('recording');
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    btn.innerHTML = "REC ●";
+    btn.classList.remove('recording');
+  }
+}
+
+function initAudioVisualizer(stream) {
+  visualizerCanvas = document.getElementById('audio-visualizer');
+  canvasCtx = visualizerCanvas.getContext('2d');
+  
+  // Set canvas resolution
+  visualizerCanvas.width = visualizerCanvas.offsetWidth;
+  visualizerCanvas.height = visualizerCanvas.offsetHeight;
+
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioContext.createMediaStreamSource(stream);
+  analyser = audioContext.createAnalyser();
+  
+  analyser.fftSize = 64; 
+  source.connect(analyser);
+  
+  const bufferLength = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLength);
+  
+  drawVisualizer();
+}
+
+function drawVisualizer() {
+  if(!localStream || !isHost) return; 
+  requestAnimationFrame(drawVisualizer);
+  
+  analyser.getByteFrequencyData(dataArray);
+  
+  canvasCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+  
+  const barWidth = (visualizerCanvas.width / dataArray.length) * 2.5;
+  let barHeight;
+  let x = 0;
+  
+  for(let i = 0; i < dataArray.length; i++) {
+    barHeight = dataArray[i] / 2;
+    const alpha = barHeight / 120; // Dynamic opacity
+    canvasCtx.fillStyle = `rgba(59, 130, 246, ${alpha})`; 
+    canvasCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
+    x += barWidth + 1;
+  }
+}
+
 // --- HARDWARE CONTROLS ---
 async function toggleTorch(fromRemote = false) {
     if(!localStream) return;
@@ -510,7 +631,6 @@ function toggleMic() {
 }
 
 function updateHardwareUI() {
-    // Update Host UI
     document.getElementById('btn-torch').classList.toggle('active', isTorchOn);
     const micBtn = document.getElementById('btn-mic');
     if(!isMicOn) {
@@ -522,7 +642,6 @@ function updateHardwareUI() {
     }
 }
 
-// Viewer Remote Functions
 function remoteToggleTorch() {
     if(activeConnections[0]) activeConnections[0].send({type: 'REMOTE_TORCH'});
 }
@@ -561,7 +680,6 @@ function showUI(mode) {
   document.getElementById('controls').style.display = mode === 'host' ? 'flex' : 'none';
   if(mode === 'host') document.getElementById('host-ui').classList.remove('hidden');
   
-  // UI LOGIC
   if (mode === 'viewer') {
       viewerBackBtn.classList.remove('hidden');
       viewerControls.classList.remove('hidden');
@@ -579,6 +697,23 @@ function goBackToMenu() {
       if(track) track.applyConstraints({ advanced: [{ torch: false }] }).catch(e=>{});
       localStream.getTracks().forEach(t => t.stop());
   }
+  
+  // Cleanup recording
+  if (isRecording && mediaRecorder) {
+      mediaRecorder.stop();
+      isRecording = false;
+  }
+  
+  // Cleanup Audio Context
+  if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+  }
+  
+  // Reset Zoom
+  document.getElementById('zoom-slider').value = 1;
+  video.style.transform = 'scale(1)';
+
   if (peer) { peer.destroy(); peer = null; }
   clearInterval(motionInterval);
   clearInterval(heartbeatInterval);
@@ -626,6 +761,8 @@ function startHost() {
       video.volume = 0;
       video.play().catch(e => console.log(e));
       showUI('host');
+      
+      initAudioVisualizer(stream); // Start Visualizer
       
       if (isArmed) fabGallery.classList.remove('hidden');
       statusEl.innerText = isArmed ? "ARMED & STREAMING" : "Streaming";
