@@ -1,240 +1,463 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Host Pro</title>
-    
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream Host Pro</title>
 
-    <style>
-        :root { --bg: #000000; --panel: #1a1a1a; --text: #ffffff; --accent: #2563eb; --danger: #ef4444; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        
-        /* Video Container */
-        #video-container { position: relative; flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Overlays */
-        .overlay { position: absolute; padding: 6px 12px; background: rgba(0,0,0,0.6); border-radius: 8px; font-size: 14px; font-weight: bold; pointer-events: none; z-index: 10; backdrop-filter: blur(4px); }
-        .top-left { top: 15px; left: 15px; }
-        .top-right { top: 15px; right: 15px; color: #4ade80; display: flex; align-items: center; gap: 8px; }
-        .blink { animation: blinker 1.5s linear infinite; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; }
-        @keyframes blinker { 50% { opacity: 0; } }
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
-        /* Control Panel */
-        #controls { background: var(--panel); padding: 25px; border-top: 1px solid #333; display: flex; flex-direction: column; gap: 15px; z-index: 20; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
-        
-        h3 { margin: 0 0 10px 0; text-align: center; color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;600&display=swap');
 
-        input, button { padding: 15px; border-radius: 12px; border: none; width: 100%; box-sizing: border-box; font-size: 18px; outline: none; transition: 0.2s; }
-        
-        input { background: #333; color: white; border: 2px solid #444; text-align: center; letter-spacing: 5px; font-family: monospace; }
-        input:focus { border-color: var(--accent); background: #222; }
-        
-        button { background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
-        button:active { transform: scale(0.98); }
-        
-        .stop-btn { background: var(--danger); color: white; margin-top: 10px; }
-        .secondary-btn { background: #333; color: #ccc; }
-        
-        /* Big Code Display */
-        .code-display { font-size: 48px; font-weight: 900; color: #fbbf24; text-align: center; letter-spacing: 8px; margin: 10px 0; font-family: monospace; }
-        
-        .hidden { display: none !important; }
-    </style>
+:root {
+  --bg: #0d0d0d;
+  --panel: rgba(20, 20, 30, 0.75);
+  --glass: rgba(30, 30, 50, 0.4);
+  --text: #e0e0ff;
+  --accent: #3b82f6;
+  --accent-glow: #60a5fa;
+  --danger: #ef4444;
+  --live: #10b981;
+  --gold: #fbbf24;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a0033 100%);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Video Area */
+#video-container {
+  position: relative;
+  flex-grow: 1;
+  background: #000;
+  overflow: hidden;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(1.05) contrast(1.1);
+}
+
+/* Beautiful Waiting Preview */
+#preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(15,15,35,0.95), rgba(30,10,50,0.9));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 5;
+  transition: opacity 0.9s ease, transform 0.7s ease;
+}
+
+.preview-content {
+  text-align: center;
+  animation: float 6s ease-in-out infinite;
+}
+
+.logo-pulse {
+  margin-bottom: 32px;
+  animation: logoPulse 2s ease-in-out infinite alternate;
+}
+
+.logo-pulse svg {
+  width: 128px;
+  height: 128px;
+  filter: drop-shadow(0 0 30px #3b82f680);
+}
+
+.preview-content h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa, #818cf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 12px;
+  letter-spacing: 3px;
+}
+
+.preview-content p {
+  font-size: 18px;
+  color: #bbbbdd;
+  margin: 0 0 32px;
+}
+
+.status-badge {
+  padding: 10px 28px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--accent);
+  border-radius: 50px;
+  font-weight: 600;
+  color: var(--accent-glow);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(59, 130,246,0.3);
+}
+
+/* Hide preview when streaming */
+body.streaming #preview-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.1);
+}
+
+/* Overlays */
+.overlay {
+  position: absolute;
+  padding: 10px 16px;
+  background: var(--glass);
+  border: 1px solid rgba(100,100,255,0.2);
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.top-left  { top: 20px; left: 20px; }
+.top-right {
+  top: 20px; right: 20px;
+  color: var(--live);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(16,185,129,0.6);
+}
+
+.blink {
+  width: 12px;
+  height: 12px;
+  background: var(--live);
+  border-radius: 50%;
+  animation: blinker 1.4s ease-in-out infinite, pulse 2s infinite;
+  box-shadow: 0 0 20px var(--live);
+}
+
+@keyframes blinker { 50% { opacity: 0.4; } }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 20px var(--live); }
+  50% { box-shadow: 0 0 35px var(--live), 0 0 50px rgba(16,185,129,0.4); }
+}
+@keyframes logoPulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+/* Control Panel */
+#controls {
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(100,100,255,0.2);
+  padding: 28px;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -20px 40px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+#controls::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.6;
+}
+
+h3 {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #aaa;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+input, button {
+  padding: 18px;
+  border-radius: 18px;
+  border: none;
+  width: 100%;
+  font-size: 19px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+input {
+  background: rgba(40,40,60,0.6);
+  color: white;
+  border: 2px solid rgba(100,100,200,0.3);
+  text-align: center;
+  letter-spacing: 8px;
+  font-family: 'Orbitron', monospace;
+  backdrop-filter: blur(8px);
+  margin-bottom: 16px;
+}
+
+input:focus {
+  border-color: var(--accent-glow);
+  background: rgba(50,50,80,0.8);
+  box-shadow: 0 0 25px rgba(59,130,246,0.4);
+  transform: scale(1.02);
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent), #2563eb);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: all 0.6s;
+}
+
+button:hover::after {
+  opacity: 1;
+ 1;
+  animation: shine 1.5s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+button:active { transform: scale(0.96); }
+
+.stop-btn {
+  background: linear-gradient(135deg, var(--danger), #dc2626);
+  box-shadow: 0 8px 25px rgba(239,68,68,0.5);
+  margin-top: 20px;
+}
+
+.secondary-btn {
+  background: rgba(60,60,80,0.6);
+  color: #ccc;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(150,150,255,0.2);
+}
+
+/* Big Code */
+.code-display {
+  font-size: 64px;
+  font-weight: 900;
+  color: transparent;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-align: center;
+  letter-spacing: 12px;
+  margin: 20px 0;
+  font-family: 'Orbitron', monospace;
+  text-shadow: 0 0 40px rgba(251,191,36,0.6);
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 30px rgba(251,191,36,0.5); }
+  to   { text-shadow: 0 0 60px rgba(251,191,36,0.9), 0 0 90px rgba(251,191,36,0.4); }
+}
+
+/* Divider */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+  color: #666;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.divider span {
+  background: var(--panel);
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #444, transparent);
+}
+
+.hidden { display: none !important; }
+</style>
 </head>
 <body>
 
-    <div id="video-container">
-        <video id="vid" autoplay playsinline></video>
-        <div class="overlay top-left" id="status">Ready</div>
-        
-        <div class="overlay top-right hidden" id="viewer-tag">
-            <div class="blink"></div> LIVE 
-            <span style="color:white; margin-left: 8px;">👤 <span id="count">0</span></span>
-        </div>
+<div id="video-container">
+  <video id="vid" autoplay playsinline></video>
+
+  <!-- Beautiful Preview Screen -->
+  <div id="preview-overlay">
+    <div class="preview-content">
+      <div class="logo-pulse">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#3b82f6" stroke-width="2" opacity="0.3"/>
+          <path d="M9 8L16 12L9 16V8Z" fill="#3b82f6"/>
+        </svg>
+      </div>
+      <h2>Stream Host Pro</h2>
+      <p>Ready to go live · Waiting for your action</p>
+      <div class="status-badge">Ready</div>
     </div>
+  </div>
 
-    <div id="controls">
-        
-        <div id="menu">
-            <h3>Start Streaming</h3>
-            <button onclick="startHost()">🎥 Start Host (Back Cam)</button>
-            
-            <div style="text-align: center; margin: 15px 0; font-size: 12px; color: #666; position: relative;">
-                <span style="background: var(--panel); padding: 0 10px; position: relative; z-index: 1;">OR JOIN</span>
-                <div style="position: absolute; top: 50%; width: 100%; height: 1px; background: #333; left: 0; z-index: 0;"></div>
-            </div>
+  <!-- Overlays -->
+  <div class="overlay top-left" id="status">Ready</div>
+  <div class="overlay top-right hidden" id="viewer-tag">
+    <div class="blink"></div> LIVE
+    <span style="margin-left:8px;color:white">Viewers: <span id="count">0</span></span>
+  </div>
+</div>
 
-            <input type="tel" id="remoteCode" placeholder="0000" maxlength="4">
-            <button class="secondary-btn" onclick="startViewer()">📺 Connect to Code</button>
-        </div>
+<div id="controls">
+  <div id="menu">
+    <h3>Start Streaming</h3>
+    <button onclick="startHost()">Start Host (Back Cam)</button>
 
-        <div id="host-ui" class="hidden">
-            <h3>Your Connection Code</h3>
-            <div id="my-code-display" class="code-display">...</div>
-            <p style="text-align: center; color: #888; font-size: 12px; margin: 0;">Enter this 4-digit code on the other device</p>
-            <button class="stop-btn" onclick="stopStream()">⏹ Stop Stream</button>
-        </div>
+    <div class="divider"><span>OR JOIN AS VIEWER</span></div>
 
-    </div>
+    <input type="tel" id="remoteCode" placeholder="0000" maxlength="4">
+    <button class="secondary-btn" onclick="startViewer()">Connect to Code</button>
+  </div>
 
-    <script>
-        // --- CONFIGURATION ---
-        const APP_PREFIX = "spck-cam-v1-"; 
+  <div id="host-ui" class="hidden">
+    <h3>Your Connection Code</h3>
+    <div id="my-code-display" class="code-display">...</div>
+    <p style="text-align:center;color:#888;margin:0;">Enter this 4-digit code on the other device</p>
+    <button class="stop-btn" onclick="stopStream()">Stop Stream</button>
+  </div>
+</div>
 
-        // --- DOM ELEMENTS ---
-        const video = document.getElementById('vid');
-        const statusEl = document.getElementById('status');
-        const viewerTag = document.getElementById('viewer-tag');
-        const countSpan = document.getElementById('count');
-        const codeDisplay = document.getElementById('my-code-display');
-        
-        let peer;
-        let localStream;
-        let activeConnections = []; // Track who is watching
+<script>
+const APP_PREFIX = "spck-cam-v1-";
+const video = document.getElementById('vid');
+const statusEl = document.getElementById('status');
+const viewerTag = document.getElementById('viewer-tag');
+const countSpan = document.getElementById('count');
+const codeDisplay = document.getElementById('my-code-display');
 
-        // --- 1. HOST LOGIC ---
-        function startHost() {
-            const shortCode = Math.floor(1000 + Math.random() * 9000); 
-            const fullPeerId = APP_PREFIX + shortCode;
+let peer, localStream, activeConnections = [];
 
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('host-ui').classList.remove('hidden');
-            codeDisplay.innerText = shortCode;
-            
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" }, 
-                audio: true 
-            }).then(stream => {
-                localStream = stream;
-                video.srcObject = stream;
-                video.muted = true; 
-                statusEl.innerText = "Initializing...";
+// === HOST ===
+function startHost() {
+  const shortCode = Math.floor(1000 + Math.random() * 9000);
+  const fullPeerId = APP_PREFIX + shortCode;
 
-                peer = new Peer(fullPeerId);
-                
-                peer.on('open', (id) => {
-                    statusEl.innerText = "Ready. Waiting for connection...";
-                });
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('host-ui').classList.remove('hidden');
+  codeDisplay.innerText = shortCode;
 
-                peer.on('error', (err) => {
-                    if (err.type === 'unavailable-id') {
-                        startHost(); // Retry if code taken
-                    } else {
-                        alert("Error: " + err.type);
-                    }
-                });
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: true })
+    .then(stream => {
+      localStream = stream;
+      video.srcObject = stream;
+      video.muted = true;
+      document.body.classList.add('streaming'); // Hide preview
+      statusEl.innerText = "Initializing...";
 
-                // When a Viewer connects
-                peer.on('connection', (conn) => {
-                    // Add to list
-                    activeConnections.push(conn);
-                    updateViewerCount();
-                    
-                    // Call them back with video
-                    const call = peer.call(conn.peer, localStream);
-                    
-                    // Show "LIVE" tag
-                    viewerTag.classList.remove('hidden');
+      peer = new Peer(fullPeerId);
 
-                    // Remove when they leave
-                    conn.on('close', () => {
-                        removeConnection(conn.peer);
-                    });
-                    
-                    // Backup: PeerJS sometimes uses 'error' for disconnects
-                    conn.on('error', () => {
-                        removeConnection(conn.peer);
-                    });
-                });
-                
-            }).catch(e => {
-                alert("Camera Error: " + e);
-                location.reload();
-            });
-        }
+      peer.on('open', () => statusEl.innerText = "Ready. Waiting for connection...");
+      peer.on('error', err => err.type === 'unavailable-id' ? startHost() : alert("Error: " + err.type));
 
-        function updateViewerCount() {
-            const count = activeConnections.length;
-            countSpan.innerText = count;
-            statusEl.innerText = count > 0 ? "Streaming to devices" : "Waiting for connection...";
-        }
+      peer.on('connection', conn => {
+        activeConnections.push(conn);
+        updateViewerCount();
+        const call = peer.call(conn.peer, localStream);
+        viewerTag.classList.remove('hidden');
 
-        function removeConnection(peerId) {
-            activeConnections = activeConnections.filter(c => c.peer !== peerId);
-            updateViewerCount();
-        }
+        conn.on('close', () => removeConnection(conn.peer));
+        conn.on('error', () => removeConnection(conn.peer));
+      });
+    })
+    .catch(e => { alert("Camera Error: " + e); location.reload(); });
+}
 
-        // --- 2. STOP STREAM FUNCTION ---
-        function stopStream() {
-            if (confirm("Stop the stream and disconnect all viewers?")) {
-                // 1. Stop Camera Hardware
-                if(localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                }
-                
-                // 2. Close all connections
-                activeConnections.forEach(conn => conn.close());
-                
-                // 3. Destroy Peer
-                if(peer) peer.destroy();
+function updateViewerCount() {
+  const count = activeConnections.length;
+  countSpan.innerText = count;
+  statusEl.innerText = count > 0 ? "Streaming to " + count + " device(s)" : "Waiting for connection...";
+}
 
-                // 4. Reload page to reset everything
-                window.location.reload();
-            }
-        }
+function removeConnection(peerId) {
+  activeConnections = activeConnections.filter(c => c.peer !== peerId);
+  updateViewerCount();
+  if (activeConnections.length === 0) viewerTag.classList.add('hidden');
+}
 
-        // --- 3. VIEWER LOGIC ---
-        function startViewer() {
-            const codeInput = document.getElementById('remoteCode').value.trim();
-            if(codeInput.length !== 4) return alert("Please enter the 4-digit code");
-            const hostId = APP_PREFIX + codeInput;
+function stopStream() {
+  if (!confirm("Stop the stream and disconnect all viewers?")) return;
+  if (localStream) localStream.getTracks().forEach(t => t.stop());
+  activeConnections.forEach(c => c.close());
+  if (peer) peer.destroy();
+  location.reload();
+}
 
-            document.getElementById('menu').classList.add('hidden');
-            statusEl.innerText = "Searching...";
-            
-            video.muted = false; 
-            video.controls = true;
+// === VIEWER ===
+function startViewer() {
+  const code = document.getElementById('remoteCode').value.trim();
+  if (code.length !== 4) return alert("Enter the 4-digit code");
+  const hostId = APP_PREFIX + code;
 
-            peer = new Peer();
+  document.getElementById('menu').classList.add('hidden');
+  statusEl.innerText = "Searching...";
 
-            peer.on('open', () => {
-                const conn = peer.connect(hostId);
+  video.muted = false;
+  video.controls = true;
 
-                conn.on('open', () => {
-                    statusEl.innerText = "Connected! Waiting for Video...";
-                });
-                
-                // If Host closes stream
-                conn.on('close', () => {
-                    alert("Host ended the stream.");
-                    window.location.reload();
-                });
+  peer = new Peer();
+  peer.on('open', () => {
+    const conn = peer.connect(hostId);
+    conn.on('open', () => statusEl.innerText = "Connected! Waiting for video...");
 
-                peer.on('call', (call) => {
-                    call.answer(null); 
-                    call.on('stream', (remoteStream) => {
-                        statusEl.innerText = "";
-                        video.srcObject = remoteStream;
-                        video.play();
-                        
-                        // Cinema Mode for Viewer
-                        document.getElementById('controls').style.display = 'none';
-                        viewerTag.classList.remove('hidden');
-                        // Viewer doesn't see count, only LIVE tag
-                        countSpan.parentElement.style.display = 'none'; 
-                    });
-                });
+    peer.on('call', call => {
+      call.answer();
+      call.on('stream', remoteStream => {
+        video.srcObject = remoteStream;
+        video.play();
+        document.body.classList.add('streaming'); // Hide preview
+        statusEl.innerText = "";
+        document.getElementById('controls').style.display = 'none';
+        viewerTag.classList.remove('hidden');
+        countSpan.parentElement.style.display = 'none';
+      });
+    });
 
-                setTimeout(() => {
-                    if(statusEl.innerText.includes("Searching")) {
-                        statusEl.innerText = "Host not found (Check Code)";
-                    }
-                }, 5000);
-            });
-        }
-    </script>
+    setTimeout(() => {
+      if (statusEl.innerText.includes("Searching")) statusEl.innerText = "Host not found";
+    }, 6000);
+  });
+}
+</script>
 </body>
 </html>
