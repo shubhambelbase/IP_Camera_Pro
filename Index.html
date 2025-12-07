@@ -35,7 +35,7 @@ body {
 #video-container { position: relative; flex-grow: 1; background:#000; overflow:hidden; }
 video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contrast(1.1); transform: scale(1); transform-origin: center; transition: transform 0.1s; position:relative; z-index: 1; }
 
-/* Hidden audio element for Talk-Back */
+/* Hidden audio for Two-Way Talk */
 #remote-audio { display: none; }
 
 #motion-alert {
@@ -52,7 +52,7 @@ video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contr
   z-index: 10; pointer-events: none; opacity: 0.8;
 }
 
-/* --- ENHANCED DASHBOARD --- */
+/* --- UI COMPONENTS --- */
 #preview-overlay {
   position: absolute; inset:0;
   background: 
@@ -64,9 +64,7 @@ video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contr
   
   display:flex; flex-direction:column; 
   align-items:center; justify-content: center;
-  padding-bottom: 10vh; 
-  padding-top: 5vh;
-
+  padding-bottom: 10vh; padding-top: 5vh;
   z-index:50; transition:all .8s ease;
 }
 body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scale(1.2); filter: blur(10px); }
@@ -74,8 +72,7 @@ body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scal
 .preview-content { text-align:center; position: relative; }
 
 .logo-container {
-  position: relative; 
-  width: 200px; height: 200px; 
+  position: relative; width: 200px; height: 200px; 
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 25px auto;
 }
@@ -90,20 +87,15 @@ body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scal
   border-left: 2px solid transparent; border-right: 2px solid transparent; border-bottom: 2px solid transparent;
   animation: spin 2s linear infinite reverse;
 }
-
 .logo-pulse svg { 
-    width: 110px; height: 110px; 
-    filter:drop-shadow(0 0 40px #3b82f6); 
+    width: 110px; height: 110px; filter:drop-shadow(0 0 40px #3b82f6); 
     animation: logoPulse 2s ease-in-out infinite alternate; 
 }
-
 .preview-content h2 { 
   font:900 38px 'Orbitron',sans-serif; 
   background:linear-gradient(90deg,#fff, #3b82f6); -webkit-background-clip:text; background-clip:text; color:transparent; 
-  letter-spacing:4px; text-transform: uppercase;
-  margin-bottom: 15px;
+  letter-spacing:4px; text-transform: uppercase; margin-bottom: 15px;
 }
-
 .tech-stats {
   display: flex; gap: 15px; justify-content: center;
   font-family: 'Orbitron', monospace; font-size: 11px; color: #555; letter-spacing: 1px;
@@ -134,16 +126,13 @@ body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scal
   border-radius:28px 28px 0 0;
   box-shadow:0 -10px 50px rgba(0,0,0,0.8); 
   position:relative; z-index: 100;
-  max-height: 65vh; 
-  overflow-y: auto;
-  padding-bottom: 40px;
+  max-height: 65vh; overflow-y: auto; padding-bottom: 40px;
 }
 
 h3 { text-align:center; color:#666; font-size:11px; text-transform:uppercase; letter-spacing:3px; margin-bottom:15px; font-weight: 800; }
 
 input, button {
-  width:100%; padding:14px;
-  border:none; border-radius:16px; font-size:16px; font-weight:600;
+  width:100%; padding:14px; border:none; border-radius:16px; font-size:16px; font-weight:600;
   margin-bottom:10px; transition:all .2s ease;
 }
 input {
@@ -152,51 +141,42 @@ input {
 }
 input:focus { border-color:var(--accent); box-shadow:0 0 15px rgba(59,130,246,.3); }
 
-/* Range Slider Styling */
-input[type=range] {
-  -webkit-appearance: none; width: 100%; background: transparent; padding: 0; margin: 10px 0;
-}
+/* Range Slider */
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; padding: 0; margin: 10px 0; }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
   background: var(--accent); cursor: pointer; margin-top: -8px; box-shadow: 0 0 10px var(--accent);
 }
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px;
-}
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
 
 button {
   background:linear-gradient(135deg,var(--accent),#2563eb); color:white; cursor:pointer;
   box-shadow:0 4px 15px rgba(37,99,235,.3); position:relative; overflow:hidden;
 }
 button:active { transform:scale(.98); }
-
 .secondary-btn { background:rgba(255,255,255,.08); color:#ccc; border:1px solid rgba(255,255,255,.1); }
 
 .code-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0 20px 0; }
 .code-display {
-  font:900 48px 'Orbitron',monospace; 
-  letter-spacing:4px; margin:0;
+  font:900 48px 'Orbitron',monospace; letter-spacing:4px; margin:0;
   background:linear-gradient(90deg,#fbbf24,#f59e0b,#f97316); -webkit-background-clip:text; background-clip:text; color:transparent;
   text-shadow:0 0 40px rgba(251,191,36,.4); animation:glow 3s ease-in-out infinite alternate;
 }
 
 .power-btn {
-    width: 60px; height: 60px; padding: 0; margin: 0;
-    border-radius: 16px; 
+    width: 60px; height: 60px; padding: 0; margin: 0; border-radius: 16px; 
     background: linear-gradient(135deg, #ef4444, #991b1b);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 15px rgba(239,68,68,0.4);
-    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(239,68,68,0.4); flex-shrink: 0;
 }
 .power-btn svg { width: 28px; height: 28px; fill: white; }
 
 .divider { position:relative; text-align:center; margin:15px 0; color:#444; font-size:11px; font-weight:700; }
 .divider span { background:#13131e; padding:0 15px; position:relative; z-index:1; }
 .divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:#333; }
-
 .hidden { display:none !important; }
 
-/* Grid for 4 tools (Flash, Mic, Rec, Speaker) */
+/* Host Tools Grid */
 .host-tools { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 5px; }
 .tool-btn { font-size: 10px; padding: 14px 2px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; transition: 0.2s; white-space: nowrap; text-align: center;}
 .tool-btn.active { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); color: var(--accent); }
@@ -211,21 +191,24 @@ button:active { transform:scale(.98); }
 input:checked + .slider { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
 input:checked + .slider:before { transform: translateX(22px); }
 
+/* Viewer Controls */
 #viewer-controls {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
   display: flex; gap: 15px; z-index: 100;
 }
 .remote-btn {
-  width: 52px; height: 52px; border-radius: 50%; border: none;
+  width: 58px; height: 58px; border-radius: 50%; border: none;
   background: rgba(20,20,30,0.9); backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2); color: white;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; transition: 0.2s;
 }
+.remote-btn svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 2px; }
+.remote-btn span { font-size: 8px; font-weight: 700; text-transform: uppercase; color: #aaa; }
 .remote-btn:active { transform: scale(0.95); }
-.remote-btn.active { background: var(--accent); border-color: var(--accent-glow); box-shadow: 0 0 20px var(--accent); }
-.remote-btn.talking { background: var(--live); box-shadow: 0 0 25px var(--live); animation: pulse 1s infinite; }
-.remote-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.remote-btn.active { background: var(--accent); border-color: var(--accent-glow); box-shadow: 0 0 20px var(--accent); color: white; }
+.remote-btn.active span { color: white; }
+.remote-btn.talking { background: var(--live); box-shadow: 0 0 25px var(--live); border-color: #4ade80; animation: pulse 1s infinite; }
 
 #viewer-back-btn {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100;
@@ -274,21 +257,17 @@ input:checked + .slider:before { transform: translateX(22px); }
 
   <div id="preview-overlay">
     <div class="preview-content">
-      
       <div class="logo-container">
           <div class="ring"></div>
           <div class="logo-pulse">
             <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#3b82f6" stroke-width="2" opacity=".3"/><path d="M9 8L16 12L9 16V8Z" fill="#3b82f6"/></svg>
           </div>
       </div>
-
       <h2>IP Camera Pro</h2>
-      
       <div class="tech-stats">
           <span><div class="dot"></div> ONLINE</span>
           <span><div class="dot" style="background:var(--gold);box-shadow:0 0 5px var(--gold)"></div> SECURE</span>
       </div>
-      
     </div>
   </div>
 
@@ -309,7 +288,6 @@ input:checked + .slider:before { transform: translateX(22px); }
 <div id="controls">
   <div id="menu">
     <h3>Setup Console</h3>
-    
     <div class="security-row">
       <div class="security-label">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
@@ -320,7 +298,6 @@ input:checked + .slider:before { transform: translateX(22px); }
         <span class="slider"></span>
       </label>
     </div>
-
     <button onclick="startHost()">Start Host</button>
     <div class="divider"><span>OR JOIN</span></div>
     <div style="display:flex; gap:10px;">
@@ -331,34 +308,38 @@ input:checked + .slider:before { transform: translateX(22px); }
 
   <div id="host-ui" class="hidden">
     <h3>Connection Code</h3>
-    
     <div class="code-row">
         <div id="my-code-display" class="code-display">...</div>
         <button class="power-btn" onclick="goBackToMenu()" title="Stop & Exit">
             <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
         </button>
     </div>
-    
     <div class="host-tools">
         <button id="btn-torch" class="tool-btn" onclick="toggleTorch()">⚡ Flash</button>
-        <button id="btn-mic" class="tool-btn" onclick="toggleMic()">🎤 Mute</button>
+        <button id="btn-mic" class="tool-btn" onclick="toggleMic()">🎤 Mic</button>
         <button id="btn-record" class="tool-btn" onclick="toggleRecording()">REC ●</button>
-        <button id="btn-speaker" class="tool-btn active" onclick="toggleSpeaker()">🔊 Sound</button>
+        <button id="btn-speaker" class="tool-btn active" onclick="toggleHostSpeaker()">🔊 Spkr</button>
     </div>
-
     <div class="divider" style="margin: 10px 0 5px 0;"><span>DIGITAL ZOOM</span></div>
     <input type="range" id="zoom-slider" min="1" max="3" step="0.1" value="1" oninput="setZoom(this.value)">
-
     <p id="security-status" style="text-align:center;color:var(--danger);font-weight:bold;display:none;font-size:12px;margin-top:10px;">[ ANTI-THEFT ACTIVE ]</p>
   </div>
 </div>
 
 <div id="viewer-controls" class="hidden">
+    <button id="rem-spk" class="remote-btn active" onclick="toggleRemoteSpeaker()">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <span>Speaker</span>
+    </button>
+    
+    <button id="rem-talk" class="remote-btn" onclick="toggleTwoWay()">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span>Talk</span>
+    </button>
+
     <button id="rem-torch" class="remote-btn" onclick="remoteToggleTorch()">
         <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-    </button>
-    <button id="rem-talk" class="remote-btn" onmousedown="startTalking()" onmouseup="stopTalking()" ontouchstart="startTalking()" ontouchend="stopTalking()">
-        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span>Flash</span>
     </button>
 </div>
 
@@ -398,14 +379,15 @@ const viewerControls = document.getElementById('viewer-controls');
 const remoteAudio = document.getElementById('remote-audio');
 
 let peer, localStream, activeConnections = [];
-let viewerStream; // Stream for talkback
+let viewerStream; 
 let wakeLock = null;
 let isHost = false;
 let db = null;
 let heartbeatInterval = null;
 let isTorchOn = false;
 let isMicOn = true;
-let isSpeakerOn = true; // Host speaker status
+let isSpeakerOn = true; 
+let isTwoWayOn = false; // Is viewer talking?
 
 // New Global Vars
 let mediaRecorder;
@@ -522,87 +504,59 @@ function setZoom(val) {
 
 function toggleRecording() {
   const btn = document.getElementById('btn-record');
-  
   if (!isRecording) {
     if (!localStream) return alert("No stream to record");
     recordedChunks = [];
-    
-    // Try codecs
     let options = { mimeType: 'video/webm;codecs=vp9' };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm' };
-    }
-
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm' };
     try {
         mediaRecorder = new MediaRecorder(localStream, options);
     } catch (e) {
         alert("Recording not supported on this device/browser");
         return;
     }
-
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) recordedChunks.push(event.data);
-    };
-
+    mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) recordedChunks.push(event.data); };
     mediaRecorder.onstop = () => {
       const blob = new Blob(recordedChunks, { type: 'video/webm' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
+      const a = document.createElement('a'); a.style.display = 'none'; a.href = url;
       a.download = 'security_clip_' + Date.now() + '.webm';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
+      document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url);
     };
-
     mediaRecorder.start();
     isRecording = true;
-    btn.innerHTML = "STOP ■";
-    btn.classList.add('recording');
+    btn.innerHTML = "STOP ■"; btn.classList.add('recording');
   } else {
     mediaRecorder.stop();
     isRecording = false;
-    btn.innerHTML = "REC ●";
-    btn.classList.remove('recording');
+    btn.innerHTML = "REC ●"; btn.classList.remove('recording');
   }
 }
 
 function initAudioVisualizer(stream) {
   visualizerCanvas = document.getElementById('audio-visualizer');
   canvasCtx = visualizerCanvas.getContext('2d');
-  
-  visualizerCanvas.width = visualizerCanvas.offsetWidth;
-  visualizerCanvas.height = visualizerCanvas.offsetHeight;
-
+  visualizerCanvas.width = visualizerCanvas.offsetWidth; visualizerCanvas.height = visualizerCanvas.offsetHeight;
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioContext.createMediaStreamSource(stream);
   analyser = audioContext.createAnalyser();
-  
   analyser.fftSize = 64; 
   source.connect(analyser);
-  
   const bufferLength = analyser.frequencyBinCount;
   dataArray = new Uint8Array(bufferLength);
-  
   drawVisualizer();
 }
 
 function drawVisualizer() {
   if(!localStream || !isHost) return; 
   requestAnimationFrame(drawVisualizer);
-  
   analyser.getByteFrequencyData(dataArray);
-  
   canvasCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
-  
   const barWidth = (visualizerCanvas.width / dataArray.length) * 2.5;
-  let barHeight;
-  let x = 0;
-  
+  let barHeight; let x = 0;
   for(let i = 0; i < dataArray.length; i++) {
     barHeight = dataArray[i] / 2;
-    const alpha = barHeight / 120; // Dynamic opacity
+    const alpha = barHeight / 120; 
     canvasCtx.fillStyle = `rgba(59, 130, 246, ${alpha})`; 
     canvasCtx.fillRect(x, visualizerCanvas.height - barHeight, barWidth, barHeight);
     x += barWidth + 1;
@@ -612,18 +566,25 @@ function drawVisualizer() {
 // --- HARDWARE CONTROLS ---
 async function toggleTorch(fromRemote = false) {
     if(!localStream) return;
+    // CRITICAL FIX: Always get the current video track, it might change on reconnect
     const track = localStream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-    if (capabilities.torch) {
-        isTorchOn = !isTorchOn;
-        try {
-            await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
-            updateHardwareUI();
-            broadcastState(); 
-        } catch(e) {}
-    } else if(!fromRemote) {
-        alert("Flashlight not supported on this device.");
+    if(!track) return;
+    
+    // Check capabilities
+    const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+    
+    // Attempt toggle if torch is supported OR if we are just blindly trying
+    isTorchOn = !isTorchOn;
+    
+    try {
+        await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
+    } catch(e) {
+        console.log("Torch error:", e);
+        // Fallback for some Androids that don't like advanced constraints if not supported
     }
+
+    updateHardwareUI();
+    broadcastState();
 }
 
 function toggleMic() {
@@ -635,58 +596,88 @@ function toggleMic() {
     broadcastState(); 
 }
 
-// Host speaker toggle
-function toggleSpeaker() {
+function toggleHostSpeaker() {
     isSpeakerOn = !isSpeakerOn;
     remoteAudio.muted = !isSpeakerOn;
-    
-    // Maximize volume when enabled
     if(isSpeakerOn) remoteAudio.volume = 1.0; 
-
     const btn = document.getElementById('btn-speaker');
-    if(isSpeakerOn) {
-        btn.classList.add('active');
-        btn.innerHTML = "🔊 Sound";
-    } else {
-        btn.classList.remove('active');
-        btn.innerHTML = "🔇 Muted";
-    }
+    if(isSpeakerOn) { btn.classList.add('active'); btn.innerHTML = "🔊 Spkr"; } 
+    else { btn.classList.remove('active'); btn.innerHTML = "🔇 Muted"; }
 }
 
 function updateHardwareUI() {
     document.getElementById('btn-torch').classList.toggle('active', isTorchOn);
     const micBtn = document.getElementById('btn-mic');
-    if(!isMicOn) {
-        micBtn.classList.add('active');
-        micBtn.innerHTML = "🎤 MUTED";
-    } else {
-        micBtn.classList.remove('active');
-        micBtn.innerHTML = "🎤 Mute";
-    }
+    if(!isMicOn) { micBtn.classList.add('active'); micBtn.innerHTML = "🎤 MUTED"; } 
+    else { micBtn.classList.remove('active'); micBtn.innerHTML = "🎤 Mic"; }
 }
 
+// --- VIEWER SIDE CONTROLS ---
+
+// 1. Flash
 function remoteToggleTorch() {
-    if(activeConnections[0]) activeConnections[0].send({type: 'REMOTE_TORCH'});
-}
-
-// Viewer Talk Back
-function startTalking() {
-    if(viewerStream) {
-        viewerStream.getAudioTracks()[0].enabled = true;
-        document.getElementById('rem-talk').classList.add('talking');
+    if(activeConnections[0] && activeConnections[0].open) {
+        activeConnections[0].send({type: 'REMOTE_TORCH'});
+        // Visual feedback for user
+        const btn = document.getElementById('rem-torch');
+        btn.style.borderColor = 'var(--accent)';
+        setTimeout(() => btn.style.borderColor = 'rgba(255,255,255,0.2)', 200);
+    } else {
+        alert("Not connected to host");
     }
 }
 
-function stopTalking() {
-    if(viewerStream) {
-        viewerStream.getAudioTracks()[0].enabled = false;
-        document.getElementById('rem-talk').classList.remove('talking');
+// 2. Speaker (Mute Incoming)
+function toggleRemoteSpeaker() {
+    video.muted = !video.muted;
+    const btn = document.getElementById('rem-spk');
+    if(!video.muted) { btn.classList.add('active'); } 
+    else { btn.classList.remove('active'); }
+}
+
+// 3. Two-Way Talk (Toggle)
+function toggleTwoWay() {
+    const btn = document.getElementById('rem-talk');
+    
+    if(!isTwoWayOn) {
+        // TURN ON
+        if(!viewerStream) {
+            // First time requesting mic
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                viewerStream = stream;
+                // Add audio track to the peer connection
+                if(activeConnections[0]) {
+                    const audioTrack = viewerStream.getAudioTracks()[0];
+                    const sender = peer.connections[activeConnections[0].peer][0].peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
+                    if(sender) {
+                        sender.replaceTrack(audioTrack);
+                    } else {
+                        // If no sender, we might need to renegotiate or add track (PeerJS limits this, but replaceTrack usually works if established)
+                        // Simple fallback: The initial call usually includes audio track even if empty.
+                        // For this simple app, we assume call.answer(stream) was used.
+                    }
+                }
+                isTwoWayOn = true;
+                btn.classList.add('talking');
+            }).catch(e => alert("Mic permission denied"));
+        } else {
+            // Already have stream, just enable track
+            viewerStream.getAudioTracks()[0].enabled = true;
+            isTwoWayOn = true;
+            btn.classList.add('talking');
+        }
+    } else {
+        // TURN OFF
+        if(viewerStream) {
+            viewerStream.getAudioTracks()[0].enabled = false;
+        }
+        isTwoWayOn = false;
+        btn.classList.remove('talking');
     }
 }
 
 function updateViewerUI(state) {
     document.getElementById('rem-torch').classList.toggle('active', state.torch);
-    // Don't update Mic button here as it's now Push-to-Talk for local user
 }
 
 // --- STATE SYNC ---
@@ -717,11 +708,13 @@ function showUI(mode) {
   if (mode === 'viewer') {
       viewerBackBtn.classList.remove('hidden');
       viewerControls.classList.remove('hidden');
+      // Set default viewer states
+      video.muted = false; // Start with sound ON
+      document.getElementById('rem-spk').classList.add('active');
   } else {
       viewerBackBtn.classList.add('hidden');
       viewerControls.classList.add('hidden');
   }
-
   requestWakeLock();
 }
 
@@ -731,24 +724,11 @@ function goBackToMenu() {
       if(track) track.applyConstraints({ advanced: [{ torch: false }] }).catch(e=>{});
       localStream.getTracks().forEach(t => t.stop());
   }
+  if (viewerStream) { viewerStream.getTracks().forEach(t => t.stop()); viewerStream = null; }
   
-  if (viewerStream) {
-      viewerStream.getTracks().forEach(t => t.stop());
-  }
+  if (isRecording && mediaRecorder) { mediaRecorder.stop(); isRecording = false; }
+  if (audioContext) { audioContext.close(); audioContext = null; }
   
-  // Cleanup recording
-  if (isRecording && mediaRecorder) {
-      mediaRecorder.stop();
-      isRecording = false;
-  }
-  
-  // Cleanup Audio Context
-  if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-  }
-  
-  // Reset Zoom
   document.getElementById('zoom-slider').value = 1;
   video.style.transform = 'scale(1)';
 
@@ -769,8 +749,7 @@ function goBackToMenu() {
   video.srcObject = null;
   countSpan.innerText = "0";
   isHost = false;
-  isTorchOn = false; 
-  isMicOn = true;
+  isTorchOn = false; isMicOn = true; isTwoWayOn = false;
   updateHardwareUI();
 }
 
@@ -791,47 +770,36 @@ function startHost() {
   const isArmed = theftToggle.checked;
   document.getElementById('security-status').style.display = isArmed ? 'block' : 'none';
 
-  getCameraStream()
-    .then(stream => {
+  getCameraStream().then(stream => {
       localStream = stream;
       video.srcObject = stream;
-      video.muted = true; 
-      video.volume = 0;
+      video.muted = true; video.volume = 0;
       video.play().catch(e => console.log(e));
       showUI('host');
-      
-      initAudioVisualizer(stream); // Start Visualizer
+      initAudioVisualizer(stream); 
       
       if (isArmed) fabGallery.classList.remove('hidden');
       statusEl.innerText = isArmed ? "ARMED & STREAMING" : "Streaming";
       statusEl.style.color = isArmed ? "var(--danger)" : "white";
-      
       if(isArmed) startMotionDetection();
 
       peer = new Peer(APP_PREFIX + shortCode, PEER_CONFIG);
-      
-      peer.on('error', err => {
-          if(err.type !== 'peer-unavailable') alert("Connection Error: " + err.type);
-      });
+      peer.on('error', err => { if(err.type !== 'peer-unavailable') alert("Connection Error: " + err.type); });
 
       peer.on('connection', conn => {
         activeConnections.push(conn);
         updateViewerCount();
         handleData(conn); 
-        
         conn.on('open', () => {
             conn.send({ type: 'SYNC_STATUS', security: isArmed });
             conn.send({ type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn });
         });
-        conn.on('close', () => { 
-            activeConnections = activeConnections.filter(c => c !== conn); 
-            updateViewerCount(); 
-        });
+        conn.on('close', () => { activeConnections = activeConnections.filter(c => c !== conn); updateViewerCount(); });
         
-        // Host CALLS the viewer
+        // Host CALLS Viewer to send video
         const call = peer.call(conn.peer, stream);
         
-        // Host LISTENS for viewer stream (Talk Back)
+        // Host RECEIVES Viewer audio (Two-Way)
         call.on('stream', remoteStream => {
             remoteAudio.srcObject = remoteStream;
             remoteAudio.play().catch(e => console.log("Audio play err", e));
@@ -841,34 +809,26 @@ function startHost() {
       });
       startHeartbeat();
     })
-    .catch(e => {
-      alert("Camera Start Failed: " + e.message);
-      goBackToMenu();
-    });
+    .catch(e => { alert("Camera Start Failed: " + e.message); goBackToMenu(); });
 }
 
-function updateViewerCount() {
-  countSpan.innerText = activeConnections.length;
-}
+function updateViewerCount() { countSpan.innerText = activeConnections.length; }
 
 function startViewer() {
   const code = document.getElementById('remoteCode').value.trim();
   if (code.length !== 4) return alert("Enter 4-digit code");
   
-  // Get Viewer Microphone Access
+  // Initialize viewer with a dummy audio stream to allow two-way negotiation later
+  // We ask for mic immediately to set up the channel
   navigator.mediaDevices.getUserMedia({ audio: true }).then(vStream => {
       viewerStream = vStream;
-      viewerStream.getAudioTracks()[0].enabled = false; // Mute initially (Push to Talk)
+      viewerStream.getAudioTracks()[0].enabled = false; // Start muted
 
       isHost = false;
       statusEl.innerText = "Connecting...";
-      
       peer = new Peer(null, PEER_CONFIG);
       
-      peer.on('error', err => {
-          alert("Connection failed. Check code or internet.");
-          goBackToMenu();
-      });
+      peer.on('error', err => { alert("Connection failed. Check code or internet."); goBackToMenu(); });
 
       peer.on('open', () => {
         const conn = peer.connect(APP_PREFIX + code);
@@ -882,13 +842,12 @@ function startViewer() {
         conn.on('close', () => { alert("Host Disconnected"); goBackToMenu(); });
         
         peer.on('call', call => {
-          // Answer with Viewer Stream (Talk back)
+          // Viewer ANSWERS with their mic stream
           call.answer(viewerStream);
-          
           call.on('stream', stream => {
             video.srcObject = stream;
-            video.muted = false; 
-            video.volume = 1;
+            // Ensure muted is false so we hear host
+            video.muted = false; video.volume = 1;
             video.play().catch(e => console.log(e));
             viewerTag.classList.remove('hidden');
             countSpan.parentElement.style.display = 'none';
@@ -896,9 +855,8 @@ function startViewer() {
           });
         });
       });
-
   }).catch(e => {
-      alert("Microphone permission needed to talk back!");
+      alert("Microphone access is required for Two-Way Audio.");
       goBackToMenu();
   });
 }
@@ -906,16 +864,12 @@ function startViewer() {
 function handleData(conn) {
   conn.on('data', data => {
     if (isHost) {
-        if (data.type === 'GET_LOGS') {
-            getAllPhotos(photos => conn.send({ type: 'LOG_DATA', photos: photos ? photos.reverse() : [] }));
-        }
+        if (data.type === 'GET_LOGS') getAllPhotos(photos => conn.send({ type: 'LOG_DATA', photos: photos ? photos.reverse() : [] }));
         if (data.type === 'REMOTE_TORCH') toggleTorch(true);
-        // REMOTE_MIC removed from here, viewer now controls their own mic
     }
     if (!isHost) {
         if (data.type === 'SYNC_STATUS') {
-            if (data.security) fabGallery.classList.remove('hidden');
-            else fabGallery.classList.add('hidden');
+            if (data.security) fabGallery.classList.remove('hidden'); else fabGallery.classList.add('hidden');
         }
         if (data.type === 'LOG_DATA') renderGallery(data.photos);
         if (data.type === 'STATE_UPDATE') updateViewerUI(data);
@@ -926,46 +880,28 @@ function handleData(conn) {
 function openGallery() {
   document.getElementById('gallery-modal').classList.add('open');
   const loader = document.getElementById('gallery-loader');
-  
   if (isHost) {
-    document.getElementById('clear-btn').style.display = 'block';
-    loader.style.display = 'none';
+    document.getElementById('clear-btn').style.display = 'block'; loader.style.display = 'none';
     getAllPhotos(photos => renderGallery(photos ? photos.reverse() : []));
   } else {
-    document.getElementById('clear-btn').style.display = 'none';
-    galleryGrid.innerHTML = ""; 
-    loader.style.display = 'block';
+    document.getElementById('clear-btn').style.display = 'none'; galleryGrid.innerHTML = ""; loader.style.display = 'block';
     if(activeConnections[0]) activeConnections[0].send({ type: 'GET_LOGS' });
   }
 }
 
 function renderGallery(photos) {
-  document.getElementById('gallery-loader').style.display = 'none';
-  galleryGrid.innerHTML = "";
-  if(!photos || photos.length === 0) {
-    galleryGrid.innerHTML = "<p style='color:#666;grid-column:span 2;text-align:center;'>No incidents recorded.</p>";
-    return;
-  }
+  document.getElementById('gallery-loader').style.display = 'none'; galleryGrid.innerHTML = "";
+  if(!photos || photos.length === 0) { galleryGrid.innerHTML = "<p style='color:#666;grid-column:span 2;text-align:center;'>No incidents recorded.</p>"; return; }
   photos.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'gallery-item';
-    div.innerHTML = `
-      <img src="${p.image}">
-      <div class="gallery-info">
-        <span class="gallery-ts">${p.time}</span>
-        <button class="download-btn" onclick="downloadImage('${p.image}', '${p.id}')">SAVE</button>
-      </div>`;
+    const div = document.createElement('div'); div.className = 'gallery-item';
+    div.innerHTML = `<img src="${p.image}"><div class="gallery-info"><span class="gallery-ts">${p.time}</span><button class="download-btn" onclick="downloadImage('${p.image}', '${p.id}')">SAVE</button></div>`;
     galleryGrid.appendChild(div);
   });
 }
 
 function downloadImage(base64, id) {
-  const link = document.createElement('a');
-  link.href = base64;
-  link.download = `security_capture_${id}.jpg`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const link = document.createElement('a'); link.href = base64; link.download = `security_capture_${id}.jpg`;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 </script>
 </body>
