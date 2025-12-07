@@ -248,6 +248,17 @@ input:checked + .slider:before { transform: translateX(22px); }
 .gallery-ts { color: var(--gold); font-size: 10px; font-family: monospace; }
 .download-btn { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 10px; cursor: pointer; box-shadow: none; width: auto; margin:0; }
 
+.app-footer {
+    text-align: center;
+    color: rgba(255,255,255,0.2);
+    font-size: 10px;
+    padding: 20px 0 10px 0;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
 @keyframes alertPulse { 0% { opacity:0.6; } 50% { opacity:1; } 100% { opacity:0.6; } }
 @keyframes blinker { 50% { opacity:.4; } }
 @keyframes pulse { 0%,100% { box-shadow:0 0 20px var(--live); } 50% { box-shadow:0 0 35px var(--live),0 0 50px rgba(16,185,129,.4); } }
@@ -312,6 +323,8 @@ input:checked + .slider:before { transform: translateX(22px); }
         <input type="tel" id="remoteCode" placeholder="CODE" maxlength="4" style="flex:1; margin:0;">
         <button class="secondary-btn" onclick="startViewer()" style="flex:1; margin:0;">Connect</button>
     </div>
+    
+    <div class="app-footer">All Rights Reserved @Shubham</div>
   </div>
 
   <div id="host-ui" class="hidden">
