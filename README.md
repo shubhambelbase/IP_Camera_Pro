@@ -19,7 +19,7 @@ A powerful, **single-file** browser-based surveillance system. Turn any device (
 
 ## 🚀 Live Demo
 
-[**Click here to Launch App**](https://your-username.github.io/your-repo-name)
+[**Click here to Launch App**]((https://wicam.netlify.app/))
 
 ## 📸 Screenshots
 
