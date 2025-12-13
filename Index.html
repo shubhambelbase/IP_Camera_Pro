@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IP Camera Pro</title>
+<title>IP Camera Pro - Secure</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
@@ -260,6 +260,24 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 #toast.show { visibility: visible; bottom: 40px; opacity: 1; }
 
+/* Approval Modal */
+#approval-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+#approval-modal.active { display: flex; }
+.approval-box {
+    background: var(--panel); border: 1px solid var(--accent);
+    padding: 25px; border-radius: 20px; text-align: center;
+    width: 100%; max-width: 320px;
+    box-shadow: 0 0 50px rgba(59, 130, 246, 0.2);
+}
+.approval-box h3 { color: var(--accent); margin-bottom: 10px; font-size: 14px; }
+.approval-box p { color: #fff; margin-bottom: 20px; font-size: 16px; font-weight: 600; }
+.approval-btns { display: flex; gap: 10px; }
+
 @keyframes alertPulse { 0% { opacity:0.6; } 50% { opacity:1; } 100% { opacity:0.6; } }
 @keyframes blinker { 50% { opacity:.4; } }
 @keyframes pulse { 0%,100% { box-shadow:0 0 20px var(--live); } 50% { box-shadow:0 0 35px var(--live),0 0 50px rgba(16,185,129,.4); } }
@@ -371,6 +389,17 @@ input:checked + .slider:before { transform: translateX(22px); }
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
 </div>
 
+<div id="approval-modal">
+    <div class="approval-box">
+        <h3>INCOMING CONNECTION</h3>
+        <p>A viewer wants to access the camera.</p>
+        <div class="approval-btns">
+            <button class="secondary-btn" onclick="denyConnection()" style="margin:0;">DENY</button>
+            <button onclick="approveConnection()" style="background:var(--live);margin:0;">APPROVE</button>
+        </div>
+    </div>
+</div>
+
 <div id="gallery-modal">
   <div class="gallery-header">
     <h2>SECURITY LOGS</h2>
@@ -402,6 +431,7 @@ const fabGallery = document.getElementById('fab-gallery');
 const viewerControls = document.getElementById('viewer-controls');
 const remoteAudio = document.getElementById('remote-audio');
 const toastEl = document.getElementById('toast');
+const approvalModal = document.getElementById('approval-modal');
 
 let peer, localStream, activeConnections = [];
 let viewerStream; 
@@ -413,6 +443,7 @@ let isTorchOn = false;
 let isMicOn = true;
 let isSpeakerOn = true; 
 let toastTimeout;
+let pendingConn = null; // Store incoming connection for approval
 
 // New Global Vars
 let mediaRecorder;
@@ -741,6 +772,8 @@ function goBackToMenu() {
   clearInterval(motionInterval);
   clearInterval(heartbeatInterval);
   activeConnections = [];
+  pendingConn = null;
+  approvalModal.classList.remove('active');
   
   document.body.classList.remove('streaming');
   document.getElementById('menu').classList.remove('hidden');
@@ -765,6 +798,43 @@ function startHeartbeat() {
             if(conn.open) conn.send({type: 'PING'});
         });
     }, 5000);
+}
+
+// APPROVAL SYSTEM FUNCTIONS
+function approveConnection() {
+    approvalModal.classList.remove('active');
+    if(!pendingConn) return;
+
+    const conn = pendingConn;
+    const isArmed = theftToggle.checked;
+    
+    activeConnections.push(conn);
+    updateViewerCount();
+    handleData(conn);
+
+    // Call the viewer with stream now that we approved
+    const call = peer.call(conn.peer, localStream);
+    call.on('stream', remoteStream => {
+        remoteAudio.srcObject = remoteStream;
+        remoteAudio.play().catch(e => console.log("Audio play err", e));
+    });
+
+    // Send init data
+    conn.send({ type: 'SYNC_STATUS', security: isArmed });
+    conn.send({ type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn });
+    conn.send({ type: 'ZOOM_SYNC', value: document.getElementById('zoom-slider').value });
+
+    viewerTag.classList.remove('hidden');
+    pendingConn = null;
+    showToast("Viewer Connected");
+}
+
+function denyConnection() {
+    approvalModal.classList.remove('active');
+    if(pendingConn) {
+        pendingConn.send({ type: 'ACCESS_DENIED' });
+        setTimeout(() => { pendingConn.close(); pendingConn = null; }, 500);
+    }
 }
 
 function startHost() {
@@ -793,7 +863,6 @@ function startHost() {
           if(err.type !== 'peer-unavailable') showToast("Connection Error: " + err.type); 
       });
 
-      // Hardening: Auto-Reconnect on disconnect
       peer.on('disconnected', () => {
           if (!peer.destroyed) {
               showToast("Connection lost. Reconnecting...");
@@ -802,25 +871,21 @@ function startHost() {
       });
 
       peer.on('connection', conn => {
-        activeConnections.push(conn);
-        updateViewerCount();
-        handleData(conn); 
-        conn.on('open', () => {
-            conn.send({ type: 'SYNC_STATUS', security: isArmed });
-            conn.send({ type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn });
-            const currentZoom = document.getElementById('zoom-slider').value;
-            conn.send({ type: 'ZOOM_SYNC', value: currentZoom });
-        });
-        conn.on('close', () => { activeConnections = activeConnections.filter(c => c !== conn); updateViewerCount(); });
-        
-        const call = peer.call(conn.peer, stream);
-        call.on('stream', remoteStream => {
-            remoteAudio.srcObject = remoteStream;
-            remoteAudio.play().catch(e => console.log("Audio play err", e));
-        });
-
-        viewerTag.classList.remove('hidden');
+          // INTERCEPT CONNECTION FOR APPROVAL
+          conn.on('open', () => {
+              pendingConn = conn;
+              approvalModal.classList.add('active');
+          });
+          conn.on('close', () => {
+              if(pendingConn === conn) {
+                  approvalModal.classList.remove('active');
+                  pendingConn = null;
+              }
+              activeConnections = activeConnections.filter(c => c !== conn);
+              updateViewerCount();
+          });
       });
+      
       startHeartbeat();
     })
     .catch(e => { showToast("Camera Start Failed: " + e.message); goBackToMenu(); });
@@ -842,7 +907,6 @@ function startViewer() {
       
       peer.on('error', err => { showToast("Connection failed. Check code."); goBackToMenu(); });
 
-      // Hardening: Auto-Reconnect
       peer.on('disconnected', () => {
           if (!peer.destroyed) {
               showToast("Connection lost. Reconnecting...");
@@ -855,11 +919,15 @@ function startViewer() {
         handleData(conn);
         conn.on('open', () => {
           showUI('viewer');
-          statusEl.innerText = "Waiting for video...";
+          statusEl.innerText = "Waiting for Host Approval...";
           activeConnections = [conn]; 
           startHeartbeat();
         });
-        conn.on('close', () => { showToast("Host Disconnected"); goBackToMenu(); });
+        
+        conn.on('close', () => { 
+             showToast("Connection Closed"); 
+             goBackToMenu(); 
+        });
         
         peer.on('call', call => {
           call.answer(viewerStream);
@@ -886,6 +954,10 @@ function handleData(conn) {
         if (data.type === 'REMOTE_TORCH') toggleTorch(true);
     }
     if (!isHost) {
+        if (data.type === 'ACCESS_DENIED') {
+            alert("Host denied your connection request.");
+            goBackToMenu();
+        }
         if (data.type === 'SYNC_STATUS') {
             if (data.security) fabGallery.classList.remove('hidden'); else fabGallery.classList.add('hidden');
         }
@@ -925,3 +997,4 @@ function downloadImage(base64, id) {
 </script>
 </body>
 </html>
+
