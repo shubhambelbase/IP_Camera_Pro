@@ -54,23 +54,30 @@ A powerful, **single-file** browser-based surveillance system. Turn any device (
 * **Storage:** IndexedDB for storing security logs/images locally.
 * **Styling:** CSS Variables, Flexbox/Grid, Glassmorphism effects.
 
-## 📦 Installation / Deployment
+## 📦 Installation & How to Run
 
-Since this is a single-file application, deployment is instant.
+Because this app uses the Camera and Microphone, browsers require it to run in a **Secure Context (HTTPS)**. You cannot simply double-click the HTML file.
 
-### Option A: GitHub Pages (Recommended)
-1. Fork or upload this repository to GitHub.
-2. Go to **Settings** -> **Pages**.
-3. Select the `main` branch and click **Save**.
-4. Your secure camera is now live at `https://<user>.github.io/<repo>`.
+### Method 1: The Easiest Way (GitHub Pages) - RECOMMENDED
+1.  Upload the `index.html` file to a GitHub repository.
+2.  Go to **Settings** > **Pages**.
+3.  Select `main` branch and click **Save**.
+4.  Open the link provided (e.g., `https://username.github.io/repo`).
+    * *Why this works:* GitHub provides free HTTPS certification automatically.
 
-### Option B: Local Server
-If running locally, you must use a local server (like Live Server in VS Code) or HTTPS, as browsers block camera access on `file://` protocols.
+### Method 2: Vercel / Netlify (Drag & Drop)
+1.  Go to [Netlify Drop](https://app.netlify.com/drop).
+2.  Drag the folder containing your `index.html` onto the page.
+3.  It will instantly generate a secure `https://...` link for you to use on your phone and PC.
 
-```bash
-# If you have Python installed
-python3 -m http.server 8000
+### Method 3: Local Development (Advanced)
+If you want to run it on your own computer:
+1.  **Localhost:** You can run a local server (e.g., `python -m http.server`) and open `http://localhost:8000`. This will work **only on that computer**.
+2.  **LAN Access:** If you want to access it from your phone on the same WiFi (e.g., `192.168.1.5:8000`), **it will fail** because it is not HTTPS. You would need to set up a self-signed certificate or use a tunneling service like **Ngrok**.
 
-# OR using Node.js http-server
-npx http-server
+   ```bash
+   # Example using Ngrok to expose local server via HTTPS
+   npx http-server
+   ngrok http 8080
+   # Use the [https://....ngrok.io](https://....ngrok.io) link provided
 
