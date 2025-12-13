@@ -23,9 +23,9 @@ A powerful, **single-file** browser-based surveillance system. Turn any device (
 
 ## 📸 Screenshots
 
-| Host Screen | Viewer Screen | Approval |
+| Host Screen | Approval | Viewer Screen |
 |:---:|:---:|:---:|
-| <img src="/host.jpg" width="250"> | <img src="/viewer.jpg" width="250"> | <img src="/approval.jpg" width="250"> |
+| <img src="/host.jpg" width="250"> | src="/approval.jpg" width="250"> | | <img src="/viewer.jpg" width="250"> |
 
 
 ## 🛠️ How to Use
