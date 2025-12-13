@@ -19,7 +19,7 @@ A powerful, **single-file** browser-based surveillance system. Turn any device (
 
 ## 🚀 Live Demo
 
-[**Click here to Launch App**]((https://wicam.netlify.app/))
+[**Click here to Launch App**](https://wicam.netlify.app/)
 
 ## 📸 Screenshots
 
@@ -73,3 +73,4 @@ python3 -m http.server 8000
 
 # OR using Node.js http-server
 npx http-server
+
