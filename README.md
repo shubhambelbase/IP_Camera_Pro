@@ -1,25 +1,42 @@
-# 🎥 IP Camera Pro (Secure P2P)
+<div align="center">
 
-![Version](https://img.shields.io/badge/version-3.0-blue.svg) ![https://github.com/shubhambelbase/SelfhostIpwebcam/blob/main/LICENSE](https://img.shields.io/badge/license-MIT-green.svg) ![WebRTC](https://img.shields.io/badge/tech-WebRTC%20%7C%20PeerJS-orange)
+  <img src="https://img.shields.io/badge/✨%20Vibe%20Coded-100%25-8A2BE2?style=for-the-badge" alt="Vibe Coded" />
+  <br />
+  <br />
 
-A powerful, **single-file** browser-based surveillance system. Turn any device (smartphone, tablet, laptop) into a security camera and view the feed remotely with full control.
+  <h1>🔒 IP Camera Pro</h1>
+  
+  <p>
+    <strong>Turn any device into a secure, AI-enhanced surveillance camera with remote control.</strong>
+  </p>
 
-**Now featuring a Host Approval System for enhanced security.**
+  <p>
+    <img src="https://img.shields.io/badge/Security-End--to--End%20Encrypted-success?style=flat-square" alt="Security" />
+    <img src="https://img.shields.io/badge/Tech-WebRTC%20%7C%20PeerJS%20%7C%20IndexedDB-blue?style=flat-square" alt="Tech Stack" />
+    <a href="https://github.com/shubhambelbase/IP_Camera_Pro/stargazers">
+      <img src="https://img.shields.io/github/stars/shubhambelbase/IP_Camera_Pro?style=social" alt="Stars" />
+    </a>
+  </p>
 
-## ✨ Key Features
+  <h3>
+    <a href="https://shubhambelbase.github.io/IP_Camera_Pro/">🔴 View Live Demo</a>
+  </h3>
+</div>
 
-* **🔒 Secure Connection:** New **Approval System**. The Host must explicitly approve incoming viewer connections.
-* **📡 Peer-to-Peer:** Direct WebRTC connection. No video data passes through a central server.
-* **🚨 Anti-Theft Mode:** Motion detection algorithm that auto-captures photos and logs incidents locally.
-* **🗣️ Two-Way Audio:** "Walkie-Talkie" style push-to-talk communication from Viewer to Host.
-* **🔦 Remote Hardware Control:** Toggle the Host's flashlight and control digital zoom remotely.
-* **📂 Local Gallery:** View motion-detected security captures stored in the browser's IndexedDB.
-* **⚡ Zero-Install:** Runs entirely in the browser. It is a single HTML file.
-* **🌙 Cyberpunk UI:** Optimized for low-light environments and OLED screens.
+---
 
-## 🚀 Live Demo
+## ⚡ The Vibe
 
-[**Click here to Launch App**](https://wicam.netlify.app/)
+This isn't just a camera app; it's a **pocket security system**. Vibe coded to feel like a sci-fi gadget, it uses a cyberpunk interface to deliver real-world utility.
+
+Built entirely in the flow state, it pushes the limits of what a web browser can do—handling video streams, motion detection, and peer-to-peer data syncing without a single backend server.
+
+## 💡 What It Does
+
+**IP Camera Pro** establishes a secure, direct connection between two devices (Host & Viewer).
+
+* **The Problem:** Traditional IP cameras are expensive, require apps, and upload your footage to questionable clouds.
+* **The Solution:** A browser-based tool that uses the device you already own. Your data streams directly between devices. **Privacy by design.**
 
 ## 📸 Screenshots
 
@@ -27,58 +44,73 @@ A powerful, **single-file** browser-based surveillance system. Turn any device (
 |:---:|:---:|:---:|
 | <img src="host.jpg" width="250"> | <img src="approval.jpg" width="250"> | <img src="viewer.jpg" width="250"> |
 
+## ✨ Key Features
 
-## 🛠️ How to Use
+| 🛡️ **Security & Monitoring** | 🎮 **Remote Control** |
+| :--- | :--- |
+| **Motion Guard:** Detects movement & auto-saves evidence | **Remote Flash:** Toggle the host flashlight remotely |
+| **Connection Approval:** You decide who connects | **2-Way Audio:** Talk back via the viewer device |
+| **Incident Gallery:** Motion logs saved to IndexedDB | **Digital Zoom:** 5x remote zoom capability |
+| **Night Vision:** Software-enhanced low-light filter | **Battery Monitor:** Live battery tracking of host |
 
-### 1. Setting up the Host (Camera)
-1. Open the app on the device you want to use as a camera.
-2. Grant permissions for **Camera** and **Microphone**.
-3. (Optional) Enable the **Anti-Theft** toggle to turn on motion detection.
-4. Click **Start Host**.
-5. A **4-Digit Code** will appear on the screen.
+## 🛠️ Built With
 
-### 2. Connecting the Viewer (Remote)
-1. Open the app on a second device.
-2. Enter the **4-Digit Code** displayed on the Host device.
-3. Click **Connect**.
-4. **Wait:** The Host device will receive a popup requesting approval.
+* **WebRTC (PeerJS):** For low-latency, encrypted P2P streaming.
+* **HTML5 Media API:** For accessing camera, microphone, and torch.
+* **IndexedDB:** For storing motion detection logs locally in the browser.
+* **Vanilla JS:** Zero framework bloat for maximum performance on old devices.
 
-### 3. Approval Process (New!)
-1. The Host device will show an **"Incoming Connection"** modal.
-2. The Host clicks **APPROVE**.
-3. The video stream begins immediately.
+## 🚀 How to Run
 
-## 🔧 Technical Stack
+Because this app requires camera and microphone permissions, **it must be run via HTTPS** or `localhost`.
 
-* **Frontend:** Vanilla HTML5, CSS3, JavaScript (ES6+).
-* **Networking:** [PeerJS](https://peerjs.com/) (WebRTC wrapper) for P2P data/media channels.
-* **Storage:** IndexedDB for storing security logs/images locally.
-* **Styling:** CSS Variables, Flexbox/Grid, Glassmorphism effects.
+### Option 1: GitHub Pages (Easiest)
+1.  Fork this repo.
+2.  Enable **GitHub Pages** in your repo settings.
+3.  Open the link on two devices (one as **Host**, one as **Viewer**).
 
-## 📦 Installation & How to Run
+### Option 2: Local Network
+1.  **Clone the repo:**
+    ```bash
+    git clone [https://github.com/shubhambelbase/IP_Camera_Pro.git](https://github.com/shubhambelbase/IP_Camera_Pro.git)
+    ```
+2.  **Navigate to folder:**
+    ```bash
+    cd IP_Camera_Pro
+    ```
+3.  **Run with a secure server:**
+    (VS Code "Live Server" works great, or use Python)
+    ```bash
+    # If using Python 3
+    python -m http.server 8000
+    ```
+    *Note: To access on a different device on your WiFi, you might need an HTTPS tunnel (like `ngrok`) because browsers block camera access on insecure HTTP connections.*
 
-Because this app uses the Camera and Microphone, browsers require it to run in a **Secure Context (HTTPS)**. You cannot simply double-click the HTML file.
+## 📖 How to Use
 
-### Method 1: The Easiest Way (GitHub Pages) - RECOMMENDED
-1.  Upload the `index.html` file to a GitHub repository.
-2.  Go to **Settings** > **Pages**.
-3.  Select `main` branch and click **Save**.
-4.  Open the link provided (e.g., `https://username.github.io/repo`).
-    * *Why this works:* GitHub provides free HTTPS certification automatically.
+1.  **Host Mode (Old Phone/Laptop):**
+    * Open the app and click **"Start Camera Host"**.
+    * (Optional) Enable **"Motion Guard"** to auto-record movement.
+    * Share the **4-digit Connection Code**.
 
-### Method 2: Vercel / Netlify (Drag & Drop)
-1.  Go to [Netlify Drop](https://app.netlify.com/drop).
-2.  Drag the folder containing your `index.html` onto the page.
-3.  It will instantly generate a secure `https://...` link for you to use on your phone and PC.
+2.  **Viewer Mode (Your Daily Phone):**
+    * Enter the 4-digit code in the "Remote Access" box.
+    * Click **"Connect"**.
+    * **Approve** the connection on the Host device.
+    * You can now see the stream, talk back, and toggle the flashlight!
 
-### Method 3: Local Development (Advanced)
-If you want to run it on your own computer:
-1.  **Localhost:** You can run a local server (e.g., `python -m http.server`) and open `http://localhost:8000`. This will work **only on that computer**.
-2.  **LAN Access:** If you want to access it from your phone on the same WiFi (e.g., `192.168.1.5:8000`), **it will fail** because it is not HTTPS. You would need to set up a self-signed certificate or use a tunneling service like **Ngrok**.
+## 🤝 Contributing
 
-   ```bash
-   # Example using Ngrok to expose local server via HTTPS
-   npx http-server
-   ngrok http 8080
-   # Use the [https://....ngrok.io](https://....ngrok.io) link provided
+Got an idea to make this even more "Cyberpunk"?
+1.  Fork it.
+2.  Create your Feature Branch (`git checkout -b feature/NightVisionV2`)
+3.  Commit your Changes.
+4.  Push to the Branch.
+5.  Open a Pull Request.
+
+---
+
+<div align="center">
+  <p>Vibe coded with ❤️ by <a href="https://github.com/shubhambelbase">Shubham Belbase</a></p>
+</div>
 
