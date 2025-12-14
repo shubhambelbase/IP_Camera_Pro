@@ -10,7 +10,7 @@
     <strong>Turn any device into a secure, AI-enhanced surveillance camera with remote control.</strong>
   </p>
 
-  <p>
+  </p>
     <img src="https://img.shields.io/badge/Security-End--to--End%20Encrypted-success?style=flat-square" alt="Security" />
     <img src="https://img.shields.io/badge/Tech-WebRTC%20%7C%20PeerJS%20%7C%20IndexedDB-blue?style=flat-square" alt="Tech Stack" />
     <a href="https://github.com/shubhambelbase/IP_Camera_Pro/stargazers">
@@ -22,7 +22,6 @@
     <a href="https://wicam.netlify.app">🔴 View Live Demo</a>
   </h3>
 </div>
----
 
 ## ⚡ The Vibe
 
