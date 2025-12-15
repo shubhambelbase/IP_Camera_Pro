@@ -443,13 +443,21 @@ let isTorchOn = false;
 let isMicOn = true;
 let isSpeakerOn = true; 
 let toastTimeout;
-let pendingConn = null; // Store incoming connection for approval
+
+// FIX 1: Connection Queue to prevent race conditions
+let connectionQueue = []; // Replaces pendingConn
+let isHandlingConnection = false;
 
 // New Global Vars
 let mediaRecorder;
 let recordedChunks = [];
 let isRecording = false;
 let audioContext, analyser, dataArray, canvasCtx, visualizerCanvas;
+
+// FIX 2: Global Canvas for reuse (Memory Leak Fix)
+const captureCanvas = document.createElement('canvas'); 
+const motionCanvas = document.createElement('canvas');
+const motionCtx = motionCanvas.getContext('2d', { willReadFrequently: true });
 
 const PEER_CONFIG = {
     config: {
@@ -460,7 +468,6 @@ const PEER_CONFIG = {
     }
 };
 
-// Hardening: Non-blocking Notification
 function showToast(msg) {
     toastEl.innerText = msg;
     toastEl.classList.add('show');
@@ -468,7 +475,6 @@ function showToast(msg) {
     toastTimeout = setTimeout(() => { toastEl.classList.remove('show'); }, 3000);
 }
 
-// Hardening: Persistent Wake Lock
 document.addEventListener('visibilitychange', async () => {
     if (wakeLock !== null && document.visibilityState === 'visible') {
         await requestWakeLock();
@@ -530,8 +536,6 @@ async function clearDatabase() {
     } catch(e) { console.error(e); }
 }
 
-let motionCanvas = document.createElement('canvas');
-let motionCtx = motionCanvas.getContext('2d');
 let lastImageData = null;
 let motionInterval = null;
 let lastCaptureTime = 0;
@@ -556,17 +560,22 @@ function checkDiff(prev, curr, w, h) {
   if (diffCount > (w * h / 16) * 0.05) triggerMotionAlert();
 }
 
+// FIX 2 & 4: Reusing canvas and Compressing Image
 function triggerMotionAlert() {
   const now = Date.now();
   if (now - lastCaptureTime < 3000) return;
   lastCaptureTime = now;
   motionAlert.classList.add('active');
   setTimeout(() => motionAlert.classList.remove('active'), 1000);
-  const c = document.createElement('canvas');
-  c.width = video.videoWidth;
-  c.height = video.videoHeight;
-  c.getContext('2d').drawImage(video, 0, 0);
-  savePhoto(c.toDataURL('image/jpeg', 0.5));
+  
+  // Reuse the global canvas
+  captureCanvas.width = video.videoWidth;
+  captureCanvas.height = video.videoHeight;
+  const ctx = captureCanvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  
+  // FIX 4: Lower quality (0.3) to prevent Data Channel Crash
+  savePhoto(captureCanvas.toDataURL('image/jpeg', 0.3));
   showToast("Motion Detected! Saved to Log.");
 }
 
@@ -723,10 +732,15 @@ function broadcastState() {
     });
 }
 
+// FIX 3: Audio Feedback Loop Fix (Constraints)
 async function getCameraStream() {
     return await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: { ideal: "environment" } }, 
-        audio: true 
+        audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+        }
     });
 }
 
@@ -772,7 +786,7 @@ function goBackToMenu() {
   clearInterval(motionInterval);
   clearInterval(heartbeatInterval);
   activeConnections = [];
-  pendingConn = null;
+  connectionQueue = []; // Clear queue
   approvalModal.classList.remove('active');
   
   document.body.classList.remove('streaming');
@@ -800,41 +814,55 @@ function startHeartbeat() {
     }, 5000);
 }
 
-// APPROVAL SYSTEM FUNCTIONS
+// FIX 1: Process Connection Queue
+function processConnectionQueue() {
+    if (connectionQueue.length > 0 && !approvalModal.classList.contains('active')) {
+        approvalModal.classList.add('active');
+    }
+}
+
 function approveConnection() {
     approvalModal.classList.remove('active');
-    if(!pendingConn) return;
+    // FIX 1: Get next from queue
+    const conn = connectionQueue.shift(); 
+    
+    if(!conn) return;
 
-    const conn = pendingConn;
     const isArmed = theftToggle.checked;
     
     activeConnections.push(conn);
     updateViewerCount();
     handleData(conn);
 
-    // Call the viewer with stream now that we approved
     const call = peer.call(conn.peer, localStream);
     call.on('stream', remoteStream => {
         remoteAudio.srcObject = remoteStream;
         remoteAudio.play().catch(e => console.log("Audio play err", e));
     });
 
-    // Send init data
     conn.send({ type: 'SYNC_STATUS', security: isArmed });
     conn.send({ type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn });
     conn.send({ type: 'ZOOM_SYNC', value: document.getElementById('zoom-slider').value });
 
     viewerTag.classList.remove('hidden');
-    pendingConn = null;
     showToast("Viewer Connected");
+    
+    // Check if more are waiting
+    setTimeout(processConnectionQueue, 500);
 }
 
 function denyConnection() {
     approvalModal.classList.remove('active');
-    if(pendingConn) {
-        pendingConn.send({ type: 'ACCESS_DENIED' });
-        setTimeout(() => { pendingConn.close(); pendingConn = null; }, 500);
+    // FIX 1: Get next from queue
+    const conn = connectionQueue.shift();
+    
+    if(conn) {
+        conn.send({ type: 'ACCESS_DENIED' });
+        setTimeout(() => { conn.close(); }, 500);
     }
+    
+    // Check if more are waiting
+    setTimeout(processConnectionQueue, 500);
 }
 
 function startHost() {
@@ -871,17 +899,15 @@ function startHost() {
       });
 
       peer.on('connection', conn => {
-          // INTERCEPT CONNECTION FOR APPROVAL
+          // FIX 1: Add to queue logic
           conn.on('open', () => {
-              pendingConn = conn;
-              approvalModal.classList.add('active');
+              connectionQueue.push(conn);
+              processConnectionQueue();
           });
           conn.on('close', () => {
-              if(pendingConn === conn) {
-                  approvalModal.classList.remove('active');
-                  pendingConn = null;
-              }
+              // Remove from active or queue
               activeConnections = activeConnections.filter(c => c !== conn);
+              connectionQueue = connectionQueue.filter(c => c !== conn);
               updateViewerCount();
           });
       });
@@ -897,7 +923,14 @@ function startViewer() {
   const code = document.getElementById('remoteCode').value.trim();
   if (code.length !== 4) return showToast("Enter 4-digit code");
   
-  navigator.mediaDevices.getUserMedia({ audio: true }).then(vStream => {
+  // FIX 3: Add constraints here too for 2-way audio safety
+  navigator.mediaDevices.getUserMedia({ 
+      audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+      } 
+  }).then(vStream => {
       viewerStream = vStream;
       viewerStream.getAudioTracks()[0].enabled = false; 
 
@@ -997,4 +1030,3 @@ function downloadImage(base64, id) {
 </script>
 </body>
 </html>
-
