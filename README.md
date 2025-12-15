@@ -4,10 +4,10 @@
   <br />
   <br />
 
-  <h1>🔒 IP Camera Pro</h1>
+  <h1>🔒 IP Camera Pro - Ultimate</h1>
   
   <p>
-    <strong>Turn any device into a secure, AI-enhanced surveillance camera with remote control.</strong>
+    <strong>Turn any device into a secure, AI-enhanced surveillance camera with FULL remote control.</strong>
   </p>
 
   </p>
@@ -27,7 +27,7 @@
 
 This isn't just a camera app; it's a **pocket security system**. Vibe coded to feel like a sci-fi gadget, it uses a cyberpunk interface to deliver real-world utility.
 
-Built entirely in the flow state, it pushes the limits of what a web browser can do—handling video streams, motion detection, and peer-to-peer data syncing without a single backend server.
+Built entirely in the flow state, **v3.0 (Ultimate)** pushes the limits of what a web browser can do—handling video streams, motion detection, and **full bi-directional hardware control** without a single backend server.
 
 ## 💡 What It Does
 
@@ -42,14 +42,15 @@ Built entirely in the flow state, it pushes the limits of what a web browser can
 |:---:|:---:|:---:|
 | <img src="host.jpg" width="250"> | <img src="approval.jpg" width="250"> | <img src="viewer.jpg" width="250"> |
 
-## ✨ Key Features
+## ✨ Key Features (v3.0)
 
-| 🛡️ **Security & Monitoring** | 🎮 **Remote Control** |
+| 🛡️ **Security & Monitoring** | 🎮 **Ultimate Remote Control** |
 | :--- | :--- |
-| **Motion Guard:** Detects movement & auto-saves evidence | **Remote Flash:** Toggle the host flashlight remotely |
+| **Motion Guard:** Detects movement & auto-saves evidence | **Remote Rotation:** Switch Host Front/Back camera remotely |
+| **Sensitivity Slider:** Adjust motion detection threshold | **Remote Night Mode:** Toggle software low-light filter |
+| **Incident Gallery:** Motion logs saved to IndexedDB | **Remote Flash:** Toggle the host flashlight |
 | **Connection Approval:** You decide who connects | **2-Way Audio:** Talk back via the viewer device |
-| **Incident Gallery:** Motion logs saved to IndexedDB | **Digital Zoom:** 5x remote zoom capability |
-| **Night Vision:** Software-enhanced low-light filter | **Battery Monitor:** Live battery tracking of host |
+| **Eco Mode:** Black screen overlay to save OLED battery | **Instant Snap:** Save high-res snapshots to Viewer |
 
 ## 🛠️ Built With
 
@@ -88,14 +89,14 @@ Because this app requires camera and microphone permissions, **it must be run vi
 
 1.  **Host Mode (Old Phone/Laptop):**
     * Open the app and click **"Start Camera Host"**.
-    * (Optional) Enable **"Motion Guard"** to auto-record movement.
+    * (Optional) Adjust **Motion Sensitivity** slider.
     * Share the **4-digit Connection Code**.
 
 2.  **Viewer Mode (Your Daily Phone):**
     * Enter the 4-digit code in the "Remote Access" box.
     * Click **"Connect"**.
     * **Approve** the connection on the Host device.
-    * You can now see the stream, talk back, and toggle the flashlight!
+    * **New Controls:** Use the icons at the bottom to Switch Camera, Toggle Night Mode, Talk, or Snap a photo!
 
 ## 🤝 Contributing
 
@@ -111,4 +112,3 @@ Got an idea to make this even more "Cyberpunk"?
 <div align="center">
   <p>Vibe coded with ❤️ by <a href="https://github.com/shubhambelbase">Shubham Belbase</a></p>
 </div>
-
