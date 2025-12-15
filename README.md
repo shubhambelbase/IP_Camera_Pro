@@ -71,7 +71,7 @@ Because this app requires camera and microphone permissions, **it must be run vi
 ### Option 2: Local Network
 1.  **Clone the repo:**
     ```bash
-    git clone [https://github.com/shubhambelbase/SelfhostIpwebcam.git](https://github.com/shubhambelbase/SelfhostIpwebcam.git)
+    git clone [https://github.com/shubhambelbase/SelfhostIpwebcam.git]
     ```
 2.  **Navigate to folder:**
     ```bash
