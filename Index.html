@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IP Camera Pro - Ultimate</title>
+<title>IP Camera Pro - Ultimate Control</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
@@ -32,7 +32,7 @@ body {
   overflow: hidden;
 }
 
-/* Added Night Vision Filter Class */
+/* Night Vision Filter - Applied to Video Element */
 .night-vision-mode {
     filter: grayscale(100%) contrast(150%) brightness(130%) sepia(20%) hue-rotate(180deg) !important;
 }
@@ -147,7 +147,6 @@ input[type=range]::-webkit-slider-thumb {
 }
 input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
 
-/* Labels for sliders */
 .range-label { display:flex; justify-content:space-between; font-size:10px; color:#aaa; font-weight:700; margin-top:-5px; margin-bottom:15px; }
 
 button {
@@ -177,7 +176,7 @@ button:active { transform:scale(.98); }
 .divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:#333; }
 .hidden { display:none !important; }
 
-.host-tools { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 5px; } /* Grid changed to 4 columns */
+.host-tools { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 5px; } 
 .tool-btn { font-size: 10px; padding: 14px 2px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #aaa; transition: 0.2s; white-space: nowrap; text-align: center; border-radius:12px;}
 .tool-btn.active { background: rgba(59, 130, 246, 0.2); border-color: var(--accent); color: var(--accent); }
 .tool-btn.recording { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); animation: pulse 1s infinite; }
@@ -191,16 +190,17 @@ button:active { transform:scale(.98); }
 input:checked + .slider { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
 input:checked + .slider:before { transform: translateX(22px); }
 
+/* Viewer Controls Grid Update */
 #viewer-controls {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 15px; z-index: 100; align-items: center;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; align-items: center; justify-content: center;
 }
 .remote-btn {
   width: 58px; height: 58px; border-radius: 50%; border: none;
   background: rgba(20,20,30,0.9); backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2); color: white;
   display: flex; align-items: center; justify-content: center; flex-direction: column;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; transition: 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; transition: 0.2s; margin: 0 auto;
 }
 .remote-btn svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 2px; }
 .remote-btn span { font-size: 8px; font-weight: 700; text-transform: uppercase; color: #aaa; }
@@ -381,8 +381,11 @@ input:checked + .slider:before { transform: translateX(22px); }
     </div>
     <div class="host-tools">
         <button id="btn-torch" class="tool-btn" onclick="toggleTorch()">⚡ Flash</button>
-        <button id="btn-night" class="tool-btn" onclick="toggleNightMode()">🌑 Night</button> <button id="btn-motion" class="tool-btn" onclick="toggleMotion()">🏃 Motion</button>
-        <button class="tool-btn" onclick="switchCamera()">🔄 Cam</button> <button class="tool-btn" onclick="toggleEcoMode()">🌙 Eco</button>
+        <button id="btn-night" class="tool-btn" onclick="toggleNightMode()">🌑 Night</button>
+        <button id="btn-motion" class="tool-btn" onclick="toggleMotion()">🏃 Motion</button>
+        <button class="tool-btn" onclick="switchCamera()">🔄 Cam</button>
+        
+        <button class="tool-btn" onclick="toggleEcoMode()">🌙 Eco</button>
         <button id="btn-mic" class="tool-btn" onclick="toggleMic()">🎤 Mic</button>
         <button id="btn-record" class="tool-btn" onclick="toggleRecording()">REC ●</button>
         <button id="btn-speaker" class="tool-btn active" onclick="toggleHostSpeaker()">🔊 Spkr</button>
@@ -394,6 +397,21 @@ input:checked + .slider:before { transform: translateX(22px); }
 </div>
 
 <div id="viewer-controls" class="hidden">
+    <button id="rem-cam" class="remote-btn" onclick="remoteSwitchCamera()">
+        <svg viewBox="0 0 24 24"><path d="M12 6v3.17l2.41-2.41c.78-.78.78-2.05 0-2.83L12 1.59V5h-1c-2.76 0-5 2.24-5 5s2.24 5 5 5h3v-2h-3c-1.66 0-3-1.34-3-3s1.34-3 3-3h1zm6 4c0-2.76-2.24-5-5-5h-1V2l-2.41 2.41c-.78.78-.78 2.05 0 2.83L12 9.66V6h1c1.66 0 3 1.34 3 3s-1.34 3-3 3h-3v2h3c2.76 0 5-2.24 5-5z"/></svg>
+        <span>Rotate</span>
+    </button>
+    
+    <button id="rem-night" class="remote-btn" onclick="remoteToggleNight()">
+        <svg viewBox="0 0 24 24"><path d="M14 2c1.82 0 3.53.5 5 1.35-2.99 1.73-5 4.95-5 8.65s2.01 6.92 5 8.65A9.973 9.973 0 0114 22C8.48 22 4 17.52 4 12S8.48 2 14 2z"/></svg>
+        <span>Night</span>
+    </button>
+    
+    <button id="rem-talk" class="remote-btn" onmousedown="startTalking()" onmouseup="stopTalking()" ontouchstart="startTalking()" ontouchend="stopTalking()">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span>TALK</span>
+    </button>
+    
     <button id="rem-snap" class="remote-btn" onclick="takeRemoteSnapshot()">
         <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
         <span>Snap</span>
@@ -402,11 +420,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     <button id="rem-spk" class="remote-btn" onclick="toggleRemoteSpeaker()">
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
         <span>Speaker</span>
-    </button>
-    
-    <button id="rem-talk" class="remote-btn" onmousedown="startTalking()" onmouseup="stopTalking()" ontouchstart="startTalking()" ontouchend="stopTalking()">
-        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        <span>TALK</span>
     </button>
 
     <button id="rem-torch" class="remote-btn" onclick="remoteToggleTorch()">
@@ -464,7 +477,7 @@ const viewerControls = document.getElementById('viewer-controls');
 const remoteAudio = document.getElementById('remote-audio');
 const toastEl = document.getElementById('toast');
 const approvalModal = document.getElementById('approval-modal');
-const sensSlider = document.getElementById('sens-slider'); // NEW
+const sensSlider = document.getElementById('sens-slider'); 
 
 let peer, localStream, activeConnections = [];
 let viewerStream; 
@@ -475,8 +488,8 @@ let heartbeatInterval = null;
 let isTorchOn = false;
 let isMicOn = true;
 let isSpeakerOn = true; 
-let isNightMode = false; // NEW
-let currentFacingMode = "environment"; // NEW
+let isNightMode = false;
+let currentFacingMode = "environment";
 let toastTimeout;
 
 let connectionQueue = [];
@@ -622,11 +635,7 @@ function toggleMotion() {
 
 function checkDiff(prev, curr, w, h) {
   let diffCount = 0;
-  // Use slider value for sensitivity (Low value on slider = High Sensitivity/Low threshold)
-  // But for UI "High Sensitivity" usually implies lower threshold
-  // UI: 10 (High) to 250 (Low). 
   const sensitivity = parseInt(sensSlider.value); 
-
   for (let i = 0; i < curr.length; i += 16) { 
     if (Math.abs(prev[i] - curr[i]) + Math.abs(prev[i+1] - curr[i+1]) + Math.abs(prev[i+2] - curr[i+2]) > sensitivity) diffCount++;
   }
@@ -729,7 +738,6 @@ async function toggleTorch(fromRemote = false) {
     broadcastState();
 }
 
-// NEW: Night Mode
 function toggleNightMode() {
     isNightMode = !isNightMode;
     const btn = document.getElementById('btn-night');
@@ -743,7 +751,7 @@ function toggleNightMode() {
     broadcastState();
 }
 
-// NEW: Switch Camera
+// Fixed Camera Switching Logic
 async function switchCamera() {
     if (!localStream) return;
     
@@ -756,7 +764,7 @@ async function switchCamera() {
     try {
         const newStream = await navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: { ideal: currentFacingMode } },
-            audio: false // Don't re-request audio, we keep the old track
+            audio: false 
         });
         
         const newVideoTrack = newStream.getVideoTracks()[0];
@@ -766,19 +774,23 @@ async function switchCamera() {
             try { await newVideoTrack.applyConstraints({ advanced: [{ torch: true }] }); } catch(e){}
         }
 
-        // Replace track in local stream
+        // Replace track in local stream (for visualizer/recording)
         const oldVideoTrack = localStream.getVideoTracks()[0];
         localStream.removeTrack(oldVideoTrack);
         localStream.addTrack(newVideoTrack);
         
         video.srcObject = localStream;
         
-        // Replace track in all peer connections
+        // Robust Track Replacement for ALL connections
         activeConnections.forEach(conn => {
-            if(peer) {
-                const senders = peer.connections[conn.peer][0].peerConnection.getSenders();
-                const sender = senders.find(s => s.track.kind === 'video');
-                if(sender) sender.replaceTrack(newVideoTrack);
+            if(peer && peer.connections[conn.peer]) {
+                peer.connections[conn.peer].forEach(pcWrapper => {
+                    const senders = pcWrapper.peerConnection.getSenders();
+                    const sender = senders.find(s => s.track && s.track.kind === 'video');
+                    if(sender) {
+                        sender.replaceTrack(newVideoTrack).catch(err => console.error("Track replace failed", err));
+                    }
+                });
             }
         });
         
@@ -832,20 +844,36 @@ function toggleFullScreen() {
 function remoteToggleTorch() {
     if(activeConnections[0] && activeConnections[0].open) {
         activeConnections[0].send({type: 'REMOTE_TORCH'});
-        const btn = document.getElementById('rem-torch');
-        btn.style.borderColor = 'var(--accent)';
-        setTimeout(() => btn.style.borderColor = 'rgba(255,255,255,0.2)', 200);
+        animateButton('rem-torch');
     }
 }
 
 function remoteToggleMotion() {
     if(activeConnections[0] && activeConnections[0].open) {
         activeConnections[0].send({type: 'REMOTE_MOTION_TOGGLE'});
-        const btn = document.getElementById('viewer-controls').querySelector('button'); // Simple selector
     }
 }
 
-// NEW: Remote Snapshot
+function remoteToggleNight() {
+    if(activeConnections[0] && activeConnections[0].open) {
+        activeConnections[0].send({type: 'REMOTE_NIGHT_TOGGLE'});
+        animateButton('rem-night');
+    }
+}
+
+function remoteSwitchCamera() {
+    if(activeConnections[0] && activeConnections[0].open) {
+        activeConnections[0].send({type: 'REMOTE_SWITCH_CAM'});
+        animateButton('rem-cam');
+    }
+}
+
+function animateButton(id) {
+    const btn = document.getElementById(id);
+    btn.style.borderColor = 'var(--accent)';
+    setTimeout(() => btn.style.borderColor = 'rgba(255,255,255,0.2)', 200);
+}
+
 function takeRemoteSnapshot() {
     if(!video.srcObject) return;
     const cvs = document.createElement('canvas');
@@ -853,7 +881,6 @@ function takeRemoteSnapshot() {
     cvs.height = video.videoHeight;
     const ctx = cvs.getContext('2d');
     
-    // Apply filters if night mode
     if(video.classList.contains('night-vision-mode')) {
         ctx.filter = 'grayscale(100%) contrast(150%) brightness(130%) sepia(20%) hue-rotate(180deg)';
     }
@@ -899,12 +926,11 @@ function stopTalking() {
 
 function updateViewerUI(state) {
     document.getElementById('rem-torch').classList.toggle('active', state.torch);
-    // NEW: Sync Night Mode
+    document.getElementById('rem-night').classList.toggle('active', state.night);
     if(state.night) video.classList.add('night-vision-mode'); else video.classList.remove('night-vision-mode');
 }
 
 function broadcastState() {
-    // UPDATED: Include motion state and night mode
     const state = { type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn, motion: theftToggle.checked, night: isNightMode };
     activeConnections.forEach(conn => {
         if(conn.open) conn.send(state);
@@ -913,7 +939,7 @@ function broadcastState() {
 
 async function getCameraStream() {
     return await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: currentFacingMode } }, // UPDATED
+        video: { facingMode: { ideal: currentFacingMode } },
         audio: {
             echoCancellation: true,
             noiseSuppression: true,
@@ -1019,7 +1045,6 @@ function approveConnection() {
         remoteAudio.play().catch(e => console.log("Audio play err", e));
     });
 
-    // Send initial status including motion state
     conn.send({ type: 'SYNC_STATUS', security: isArmed });
     conn.send({ type: 'STATE_UPDATE', torch: isTorchOn, mic: isMicOn, motion: isArmed, night: isNightMode });
     conn.send({ type: 'ZOOM_SYNC', value: document.getElementById('zoom-slider').value });
@@ -1136,13 +1161,10 @@ function startViewer() {
         peer.on('call', call => {
           call.answer(viewerStream);
           call.on('stream', stream => {
-            // FIX: Prevent re-loading same stream
             if (video.srcObject && video.srcObject.id === stream.id) return;
-            
             video.srcObject = stream;
             video.muted = true; 
             
-            // FIX: Handle AbortError safely
             const playPromise = video.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
@@ -1169,6 +1191,8 @@ function handleData(conn) {
         if (data.type === 'GET_LOGS') getAllPhotos(photos => conn.send({ type: 'LOG_DATA', photos: photos ? photos.reverse() : [] }));
         if (data.type === 'REMOTE_TORCH') toggleTorch(true);
         if (data.type === 'REMOTE_MOTION_TOGGLE') toggleMotion();
+        if (data.type === 'REMOTE_SWITCH_CAM') switchCamera(); // NEW
+        if (data.type === 'REMOTE_NIGHT_TOGGLE') toggleNightMode(); // NEW
     }
     if (!isHost) {
         if (data.type === 'ACCESS_DENIED') {
