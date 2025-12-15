@@ -30,6 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 /* Night Vision Filter - Applied to Video Element */
@@ -37,7 +38,7 @@ body {
     filter: grayscale(100%) contrast(150%) brightness(130%) sepia(20%) hue-rotate(180deg) !important;
 }
 
-#video-container { position: relative; flex-grow: 1; background:#000; overflow:hidden; }
+#video-container { position: relative; flex-grow: 1; background:#000; overflow:hidden; width: 100%; display: flex; justify-content: center; background: #000; }
 video { width:100%; height:100%; object-fit:cover; filter:brightness(1.05) contrast(1.1); transform: scale(1); transform-origin: center; transition: transform 0.2s ease-out; position:relative; z-index: 1; }
 
 #remote-audio { display: none; }
@@ -126,6 +127,10 @@ body.streaming #preview-overlay { opacity:0; pointer-events:none; transform:scal
   box-shadow:0 -10px 50px rgba(0,0,0,0.8); 
   position:relative; z-index: 100;
   max-height: 65vh; overflow-y: auto; padding-bottom: 40px;
+  /* Alignment Fixes for Desktop/Tablet */
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 h3 { text-align:center; color:#666; font-size:11px; text-transform:uppercase; letter-spacing:3px; margin-bottom:15px; font-weight: 800; }
@@ -190,10 +195,11 @@ button:active { transform:scale(.98); }
 input:checked + .slider { background-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
 input:checked + .slider:before { transform: translateX(22px); }
 
-/* Viewer Controls Grid Update */
+/* Viewer Controls Grid Update - FIXED ALIGNMENT */
 #viewer-controls {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; z-index: 100; align-items: center; justify-content: center;
+  width: 100%; max-width: 400px; /* Constrain width on desktop */
 }
 .remote-btn {
   width: 58px; height: 58px; border-radius: 50%; border: none;
@@ -232,12 +238,12 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 #fab-gallery:active { transform: scale(0.9); }
 
-#gallery-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; padding: 20px; }
+#gallery-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; padding: 20px; align-items: center; }
 #gallery-modal.open { display: flex; }
-.gallery-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom:10px; border-bottom:1px solid #333; }
+.gallery-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom:10px; border-bottom:1px solid #333; width: 100%; max-width: 600px; }
 .gallery-header h2 { color: var(--danger); font-family: 'Orbitron'; letter-spacing: 2px; font-size: 18px; }
 .close-modal { background: none; border: none; color: #fff; font-size: 28px; width: auto; padding: 0; box-shadow: none; margin:0; }
-.gallery-content { flex-grow: 1; overflow-y: auto; }
+.gallery-content { flex-grow: 1; overflow-y: auto; width: 100%; max-width: 600px; }
 .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding-bottom: 50px; }
 .gallery-item { position: relative; border: 1px solid #333; border-radius: 10px; overflow: hidden; background:#111; }
 .gallery-item img { width: 100%; height: 120px; object-fit: cover; display: block; }
@@ -1276,3 +1282,4 @@ function downloadImage(base64, id) {
 </script>
 </body>
 </html>
+
